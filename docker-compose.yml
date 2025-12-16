@@ -1,0 +1,135 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: app_auth_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_auth
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth-network
+
+  loki:
+    image: grafana/loki:latest
+    container_name: app_auth_loki
+    restart: always
+    ports:
+      - '3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - auth-network
+    healthcheck:
+      test: [ 'CMD', 'wget', '--spider', '-q', 'http://localhost:3100/ready' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: app_auth_redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: app_auth_grafana
+    restart: always
+    ports:
+      - '3001:3000'
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+    networks:
+      - auth-network
+    healthcheck:
+      test: [ 'CMD', 'wget', '--spider', '-q', 'http://localhost:3000/api/health' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_auth_app
+    restart: always
+    ports:
+      - '0.0.0.0:3000:3000'
+    environment:
+      NODE_ENV: production
+      APP_PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: app_auth
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-min-10-chars}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      MAIL_HOST: ${MAIL_HOST:-smtp.yandex.ru}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-app-mini@yandex.ru}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-zuvfwhdaqsvkjopi}
+      MAIL_FROM: ${MAIL_FROM:-app-mini@yandex.ru}
+      MAIL_SECURE: ${MAIL_SECURE:-false}
+      CODE_LENGTH: ${CODE_LENGTH:-5}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-your-super-secret-encryption-key-min-10-chars}
+      LOKI_HOST: http://loki:3100
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - auth-network
+    healthcheck:
+      test: [ 'CMD', 'node', '-e', "require('http').get('http://localhost:3000/app/health-check', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  auth-network:
+    name: auth-network
+    external: false
+    driver: bridge
+
+volumes:
+  postgres_data:
+  loki_data:
+  grafana_data:
+  redis_data:
+
+
