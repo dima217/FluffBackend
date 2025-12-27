@@ -26,7 +26,7 @@ export class Profile {
   @Column()
   photo: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 10, nullable: true })
   gender: string | null;
 
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
