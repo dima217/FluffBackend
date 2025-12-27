@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,11 +30,6 @@ services:
       - loki_data:/loki
     networks:
       - auth-network
-    healthcheck:
-      test: [ 'CMD', 'wget', '--spider', '-q', 'http://localhost:3100/ready' ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -44,14 +39,14 @@ services:
       - '6379:6379'
     volumes:
       - redis_data:/data
-    networks:
-      - auth-network
+    command: redis-server --appendonly yes
     healthcheck:
-      test: [ 'CMD', 'redis-cli', 'ping' ]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
-    command: redis-server --appendonly yes
+    networks:
+      - auth-network
 
   grafana:
     image: grafana/grafana:latest
@@ -68,11 +63,6 @@ services:
       - loki
     networks:
       - auth-network
-    healthcheck:
-      test: [ 'CMD', 'wget', '--spider', '-q', 'http://localhost:3000/api/health' ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   app:
     build:
@@ -107,23 +97,27 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      loki:
-        condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - auth-network
+      loki:
+        condition: service_started
     healthcheck:
-      test: [ 'CMD', 'node', '-e', "require('http').get('http://localhost:3000/app/health-check', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" ]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/app/health-check', r => process.exit(r.statusCode === 200 ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - auth-network
 
 networks:
   auth-network:
-    name: auth-network
-    external: false
     driver: bridge
 
 volumes:
@@ -131,5 +125,3 @@ volumes:
   loki_data:
   grafana_data:
   redis_data:
-
-
