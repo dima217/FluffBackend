@@ -47,6 +47,7 @@ services:
       retries: 5
     networks:
       - auth-network
+      - shared-network
 
   grafana:
     image: grafana/grafana:latest
@@ -119,6 +120,9 @@ services:
 networks:
   auth-network:
     driver: bridge
+  shared-network:
+    external: true
+    name: shared-network
 
 volumes:
   postgres_data:
