@@ -53,6 +53,15 @@ export class RecipeMapper {
       })),
     };
 
+    // Handle promotionalVideo: use mediaId if provided
+    let promotionalVideo: string | null = null;
+    let promotionalVideoMediaId: string | null = null;
+
+    if (createDto.promotionalVideoMediaId) {
+      promotionalVideo = `media:${createDto.promotionalVideoMediaId}`; // Placeholder
+      promotionalVideoMediaId = createDto.promotionalVideoMediaId;
+    }
+
     return {
       user: user || null,
       name: createDto.name,
@@ -66,7 +75,8 @@ export class RecipeMapper {
         coverMediaId: createDto.imageMediaIds.coverMediaId,
         previewMediaId: createDto.imageMediaIds.previewMediaId,
       } as RecipeImageMediaIds,
-      promotionalVideo: createDto.promotionalVideo || null,
+      promotionalVideo,
+      promotionalVideoMediaId,
       description: createDto.description || null,
       products,
       fluffAt: createDto.fluffAt || null,

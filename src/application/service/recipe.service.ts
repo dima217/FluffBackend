@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IRecipeService } from '@application/interface/service/recipe.service';
 import type { IRecipeRepository } from '@domain/interface/recipe.repository';
 import type { IRecipeTypeRepository } from '@domain/interface/recipe-type.repository';
@@ -22,12 +23,15 @@ import {
   PrepareStepResourcesUploadDto,
   PrepareStepResourcesUploadResponseDto,
   StepResourceUploadResponseDto,
+  PrepareVideoUploadDto,
+  PrepareVideoUploadResponseDto,
   ConfirmRecipeUploadDto,
 } from '@application/dto/recipe.dto';
 import { RecipeMapper } from '@application/mapper/recipe.mapper';
 import { RelatedEntityType } from '@domain/enums/related-entity-type.enum';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { MediaService } from '@application/service/media.service';
+import type { AppConfig } from '@config';
 
 @Injectable()
 export class RecipeService implements IRecipeService {
@@ -45,6 +49,7 @@ export class RecipeService implements IRecipeService {
     @Inject(REPOSITORY_CONSTANTS.FAVORITE_REPOSITORY)
     private readonly favoriteRepository: IFavoriteRepository,
     private readonly mediaService: MediaService,
+    private readonly configService: ConfigService<AppConfig>,
   ) {}
 
   async create(userId: number | null, createDto: CreateRecipeDto): Promise<Recipe> {
@@ -125,6 +130,16 @@ export class RecipeService implements IRecipeService {
       throw new BadRequestException('Cover or preview URL not found');
     }
 
+    // Update promotionalVideo if mediaId was used
+    let promotionalVideoUrl: string | null = recipe.promotionalVideo;
+    if (recipe.promotionalVideoMediaId) {
+      const videoUrl = mediaUrlMap.get(recipe.promotionalVideoMediaId);
+      if (!videoUrl) {
+        throw new BadRequestException('Promotional video URL not found');
+      }
+      promotionalVideoUrl = videoUrl;
+    }
+
     // Update stepsConfig resources with URLs
     // Extract mediaIds from placeholder URLs (format: "media:mediaId")
     const updatedStepsConfig = {
@@ -153,6 +168,8 @@ export class RecipeService implements IRecipeService {
         preview: previewUrl,
       },
       imageMediaIds: null, // Clear mediaIds after successful update
+      promotionalVideo: promotionalVideoUrl,
+      promotionalVideoMediaId: null, // Clear mediaId after successful update
       stepsConfig: updatedStepsConfig,
     };
 
@@ -236,6 +253,32 @@ export class RecipeService implements IRecipeService {
     const resources = await Promise.all(uploadPromises);
 
     return { resources };
+  }
+
+  async prepareVideoUpload(
+    userId: number | null,
+    prepareDto: PrepareVideoUploadDto,
+    token: string,
+  ): Promise<PrepareVideoUploadResponseDto> {
+    this.logger.log(`Preparing upload for promotional video`);
+
+    const videoMedia = await this.mediaService.createMedia(
+      {
+        filename: prepareDto.filename,
+        size: prepareDto.size,
+        metadata: {
+          type: 'recipe-promotional-video',
+          userId: userId?.toString(),
+        },
+      },
+      token,
+    );
+
+    return {
+      mediaId: videoMedia.mediaId,
+      uploadUrl: videoMedia.uploadUrl,
+      url: videoMedia.url,
+    };
   }
 
   async markMediaAsUploaded(mediaId: string, token: string): Promise<void> {

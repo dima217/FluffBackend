@@ -7,6 +7,8 @@ import {
   PrepareUploadResponseDto,
   PrepareStepResourcesUploadDto,
   PrepareStepResourcesUploadResponseDto,
+  PrepareVideoUploadDto,
+  PrepareVideoUploadResponseDto,
   ConfirmRecipeUploadDto,
 } from '@application/dto/recipe.dto';
 
@@ -31,6 +33,11 @@ export interface IRecipeService {
     prepareDto: PrepareStepResourcesUploadDto,
     token: string,
   ): Promise<PrepareStepResourcesUploadResponseDto>;
+  prepareVideoUpload(
+    userId: number | null,
+    prepareDto: PrepareVideoUploadDto,
+    token: string,
+  ): Promise<PrepareVideoUploadResponseDto>;
   markMediaAsUploaded(mediaId: string, token: string): Promise<void>;
   findOne(id: number): Promise<Recipe>;
   findAll(userId?: number | null): Promise<Recipe[]>;

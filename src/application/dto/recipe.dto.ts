@@ -164,12 +164,12 @@ export class CreateRecipeWithMediaIdsDto {
   imageMediaIds: RecipeImageMediaIdsDto;
 
   @ApiPropertyOptional({
-    example: 'https://example.com/promo.mp4',
-    description: 'Promotional video URL',
+    example: '507f1f77bcf86cd799439015',
+    description: 'Promotional video media ID (from prepare-video-upload)',
   })
   @IsOptional()
   @IsString()
-  promotionalVideo?: string;
+  promotionalVideoMediaId?: string;
 
   @ApiPropertyOptional({ example: 'A delicious pasta recipe', description: 'Recipe description' })
   @IsOptional()
@@ -390,6 +390,44 @@ export class PrepareStepResourcesUploadResponseDto {
   resources: StepResourceUploadResponseDto[];
 }
 
+export class PrepareVideoUploadDto {
+  @ApiProperty({
+    example: 'promo.mp4',
+    description: 'Video filename',
+  })
+  @IsString()
+  @IsNotEmpty()
+  filename: string;
+
+  @ApiProperty({
+    example: 10485760,
+    description: 'Video file size in bytes',
+  })
+  @IsNumber()
+  @Min(1)
+  size: number;
+}
+
+export class PrepareVideoUploadResponseDto {
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439015',
+    description: 'Video media ID',
+  })
+  mediaId: string;
+
+  @ApiProperty({
+    example: 'https://minio.example.com/bucket/user123/promo.mp4?X-Amz-Algorithm=...',
+    description: 'Presigned URL for video upload',
+  })
+  uploadUrl: string;
+
+  @ApiProperty({
+    example: '/user123/promo.mp4',
+    description: 'Video URL (use this in recipe creation)',
+  })
+  url: string;
+}
+
 export class ConfirmRecipeUploadDto {
   @ApiProperty({
     example: 1,
@@ -401,8 +439,9 @@ export class ConfirmRecipeUploadDto {
 
   @ApiProperty({
     type: [String],
-    example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
-    description: 'Array of all media IDs that were uploaded (cover, preview, and step resources)',
+    example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', '507f1f77bcf86cd799439015'],
+    description:
+      'Array of all media IDs that were uploaded (cover, preview, promotionalVideo if provided, and step resources)',
   })
   @IsArray()
   @IsString({ each: true })

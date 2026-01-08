@@ -5,6 +5,7 @@ import { RecipeController } from "./recipe.controller";
 import { ProductController } from "./product.controller";
 import { FavoriteController } from "./favorite.controller";
 import { TrackingController } from "./tracking.controller";
+import { MediaController } from "./media.controller";
 import { ApplicationModule } from "@application/application.module";
 
 @Module({
@@ -16,6 +17,7 @@ import { ApplicationModule } from "@application/application.module";
 		ProductController,
 		FavoriteController,
 		TrackingController,
+		MediaController,
 	],
 })
 export class ControllerModule {

@@ -5,3 +5,4 @@ export { RecipeController } from './recipe.controller';
 export { ProductController } from './product.controller';
 export { FavoriteController } from './favorite.controller';
 export { TrackingController } from './tracking.controller';
+export { MediaController } from './media.controller';

@@ -21,4 +21,5 @@ export interface IMediaService {
   markAsLoaded(mediaId: string, token: string): Promise<void>;
   uploadFile(mediaId: string, file: Express.Multer.File, token: string): Promise<void>;
   getMediaUrls(mediaIds: string[], token: string): Promise<MediaUrlResponseDto[]>;
+  getMediaStream(mediaId: string, token: string): Promise<NodeJS.ReadableStream>;
 }

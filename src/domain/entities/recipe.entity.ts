@@ -72,6 +72,9 @@ export class Recipe {
   @Column('varchar', { nullable: true })
   promotionalVideo: string | null;
 
+  @Column('varchar', { nullable: true })
+  promotionalVideoMediaId: string | null;
+
   @Column('text', { nullable: true })
   description: string | null;
 

@@ -32,6 +32,8 @@ import {
   PrepareUploadResponseDto,
   PrepareStepResourcesUploadDto,
   PrepareStepResourcesUploadResponseDto,
+  PrepareVideoUploadDto,
+  PrepareVideoUploadResponseDto,
   ConfirmRecipeUploadDto,
 } from '@application/dto/recipe.dto';
 import { RecipeMapper } from '@application/mapper/recipe.mapper';
@@ -116,13 +118,14 @@ export class RecipeController {
   @ApiOperation({
     summary: 'Mark media as uploaded',
     description:
-      'Mark a media file as successfully uploaded after direct upload to S3/MinIO using presigned URL. Use for both recipe images and step resources.',
+      'Mark a media file as successfully uploaded after direct upload to S3/MinIO using presigned URL. Use for recipe images, step resources, and promotional video.',
   })
   @ApiBearerAuth('JWT-auth')
   @ApiParam({
     name: 'mediaId',
     type: String,
-    description: 'Media ID from prepare-upload or prepare-step-resources-upload response',
+    description:
+      'Media ID from prepare-upload, prepare-step-resources-upload, or prepare-video-upload response',
   })
   @ApiResponse({ status: 200, description: 'Media marked as uploaded successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })

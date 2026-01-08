@@ -14,6 +14,10 @@ COPY . .
 # Build application
 RUN npm run build
 
+# Verify build output exists
+RUN ls -la dist/src/ && echo "Build output verified"
+RUN test -f dist/src/main.js || (echo "ERROR: dist/src/main.js not found after build!" && ls -la dist/ 2>/dev/null && exit 1)
+
 # Expose port
 EXPOSE 3000
 

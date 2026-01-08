@@ -135,4 +135,43 @@ export class MediaService implements IMediaService {
       throw new HttpException('Failed to connect to media service', HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
+
+  async getMediaStream(mediaId: string, token: string): Promise<NodeJS.ReadableStream> {
+    try {
+      this.logger.debug(`Getting media stream for ${mediaId}`);
+
+      // First, get the URL for this mediaId
+      const mediaUrls = await this.getMediaUrls([mediaId], token);
+      if (mediaUrls.length === 0 || !mediaUrls[0].url) {
+        throw new HttpException(
+          `Media URL not found for mediaId: ${mediaId}`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const mediaUrl = mediaUrls[0].url;
+      this.logger.debug(`Media URL for ${mediaId}: ${mediaUrl}`);
+
+      // Use the download endpoint with url query parameter
+      const response = await this.httpClient.get('/media/download', {
+        params: {
+          url: mediaUrl,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'stream',
+      });
+      return response.data;
+    } catch (error: any) {
+      this.logger.error(`Failed to get media stream: ${error.message}`, error.stack);
+      if (error.response) {
+        throw new HttpException(
+          error.response.data?.message || 'Failed to get media file',
+          error.response.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      throw new HttpException('Failed to connect to media service', HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
 }

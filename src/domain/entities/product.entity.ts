@@ -6,6 +6,11 @@ export interface ProductImage {
 	preview: string;
 }
 
+export interface ProductImageMediaIds {
+	coverMediaId: string;
+	previewMediaId: string;
+}
+
 @Entity()
 @Index(['name'])
 export class Product {
@@ -26,6 +31,9 @@ export class Product {
 
 	@Column('jsonb', { nullable: true })
 	image: ProductImage | null;
+
+	@Column('jsonb', { nullable: true })
+	imageMediaIds: ProductImageMediaIds | null;
 
 	@Column('int', { default: 0 })
 	@Min(0)
