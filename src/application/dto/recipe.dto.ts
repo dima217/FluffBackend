@@ -13,21 +13,21 @@ import {
 import { Type } from 'class-transformer';
 
 export class RecipeImageDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: 'https://example.com/cover.jpg',
-    description: 'Cover image URL (required if coverFile is not provided)',
+    description: 'Cover image URL. Use URL from prepare-upload response or direct URL',
   })
-  @IsOptional()
   @IsString()
-  cover?: string;
+  @IsNotEmpty()
+  cover: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: 'https://example.com/preview.jpg',
-    description: 'Preview image URL (required if previewFile is not provided)',
+    description: 'Preview image URL. Use URL from prepare-upload response or direct URL',
   })
-  @IsOptional()
   @IsString()
-  preview?: string;
+  @IsNotEmpty()
+  preview: string;
 }
 
 export class RecipeResourceDto {
@@ -83,15 +83,14 @@ export class CreateRecipeDto {
   @IsNotEmpty()
   recipeTypeId: number;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: RecipeImageDto,
-    description: 'Recipe images (URLs). Required if files are not provided via multipart/form-data',
+    description: 'Recipe images (URLs). Use presigned URLs from POST /recipes/prepare-upload or direct URLs',
   })
-  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => RecipeImageDto)
-  image?: RecipeImageDto;
+  image: RecipeImageDto;
 
   @ApiPropertyOptional({
     example: 'https://example.com/promo.mp4',
@@ -131,6 +130,78 @@ export class CreateRecipeDto {
   @ValidateNested()
   @Type(() => RecipeStepsConfigDto)
   stepsConfig: RecipeStepsConfigDto;
+}
+
+export class PrepareUploadDto {
+  @ApiProperty({
+    example: 'cover.jpg',
+    description: 'Cover image filename',
+  })
+  @IsString()
+  @IsNotEmpty()
+  coverFilename: string;
+
+  @ApiProperty({
+    example: 1024000,
+    description: 'Cover image size in bytes',
+  })
+  @IsNumber()
+  @Min(1)
+  coverSize: number;
+
+  @ApiProperty({
+    example: 'preview.jpg',
+    description: 'Preview image filename',
+  })
+  @IsString()
+  @IsNotEmpty()
+  previewFilename: string;
+
+  @ApiProperty({
+    example: 512000,
+    description: 'Preview image size in bytes',
+  })
+  @IsNumber()
+  @Min(1)
+  previewSize: number;
+}
+
+export class PrepareUploadResponseDto {
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439011',
+    description: 'Cover media ID',
+  })
+  coverMediaId: string;
+
+  @ApiProperty({
+    example: 'https://minio.example.com/bucket/user123/cover.jpg?X-Amz-Algorithm=...',
+    description: 'Presigned URL for cover image upload',
+  })
+  coverUploadUrl: string;
+
+  @ApiProperty({
+    example: '/user123/cover.jpg',
+    description: 'Cover image URL (use this in recipe creation)',
+  })
+  coverUrl: string;
+
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439012',
+    description: 'Preview media ID',
+  })
+  previewMediaId: string;
+
+  @ApiProperty({
+    example: 'https://minio.example.com/bucket/user123/preview.jpg?X-Amz-Algorithm=...',
+    description: 'Presigned URL for preview image upload',
+  })
+  previewUploadUrl: string;
+
+  @ApiProperty({
+    example: '/user123/preview.jpg',
+    description: 'Preview image URL (use this in recipe creation)',
+  })
+  previewUrl: string;
 }
 
 export class UpdateRecipeDto {

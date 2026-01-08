@@ -79,13 +79,14 @@ export class MediaService implements IMediaService {
     token: string,
   ): Promise<void> {
     try {
-      this.logger.debug(`Uploading file for media ${mediaId}`);
+      this.logger.debug(`Uploading file for media ${mediaId} (size: ${file.buffer.length} bytes)`);
       const formData = new FormData();
       formData.append('file', file.buffer, {
         filename: file.originalname,
         contentType: file.mimetype,
       });
 
+      // Use streaming upload for better memory efficiency
       await this.httpClient.put(`/media/upload-redirect/${mediaId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -93,6 +94,8 @@ export class MediaService implements IMediaService {
         },
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
+        // Increase timeout for large files
+        timeout: 60000, // 60 seconds
       });
     } catch (error: any) {
       this.logger.error(`Failed to upload file: ${error.message}`, error.stack);

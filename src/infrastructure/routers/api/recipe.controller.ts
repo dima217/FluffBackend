@@ -11,8 +11,6 @@ import {
   HttpStatus,
   ParseIntPipe,
   ForbiddenException,
-  UseInterceptors,
-  UploadedFiles,
   BadRequestException,
 } from '@nestjs/common';
 import {
@@ -23,46 +21,99 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
-  ApiConsumes,
 } from '@nestjs/swagger';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { RecipeService } from '@application/service/recipe.service';
-import { CreateRecipeDto, UpdateRecipeDto, RecipeResponseDto } from '@application/dto/recipe.dto';
+import {
+  CreateRecipeDto,
+  UpdateRecipeDto,
+  RecipeResponseDto,
+  PrepareUploadDto,
+  PrepareUploadResponseDto,
+} from '@application/dto/recipe.dto';
 import { RecipeMapper } from '@application/mapper/recipe.mapper';
 import { User as UserDecorator } from '@infrastructure/decorator/user.decorator';
 import { Token } from '@infrastructure/decorator/token.decorator';
 import { Public } from '@infrastructure/decorator/public.decorator';
 import type { User as UserEntity } from '@domain/entities/user.entity';
 
-type MulterFile = {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  size: number;
-  buffer: Buffer;
-};
-
 @ApiTags('Recipes')
 @Controller('recipes')
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
+  @Post('prepare-upload')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Prepare upload URLs for recipe images',
+    description:
+      'Get presigned URLs for direct upload to S3/MinIO. Use this endpoint before creating a recipe with file uploads.\n\n' +
+      '**Workflow:**\n' +
+      '1. Call this endpoint to get presigned URLs\n' +
+      '2. Upload files directly to S3/MinIO using the presigned URLs (PUT request with file content)\n' +
+      '3. Call POST /recipes/mark-uploaded/{mediaId} for each uploaded file\n' +
+      '4. Create recipe using the returned URLs in image.cover and image.preview fields',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiBody({ type: PrepareUploadDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Presigned URLs generated successfully',
+    type: PrepareUploadResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async prepareUpload(
+    @UserDecorator() user: UserEntity | null,
+    @Body() prepareDto: PrepareUploadDto,
+    @Token() token: string,
+  ): Promise<PrepareUploadResponseDto> {
+    if (!token) {
+      throw new BadRequestException('JWT token is required');
+    }
+    const userId = user?.id || null;
+    return await this.recipeService.prepareUpload(userId, prepareDto, token);
+  }
+
+  @Post('mark-uploaded/:mediaId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mark media as uploaded',
+    description:
+      'Mark a media file as successfully uploaded after direct upload to S3/MinIO using presigned URL.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({ name: 'mediaId', type: String, description: 'Media ID from prepare-upload response' })
+  @ApiResponse({ status: 200, description: 'Media marked as uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async markUploaded(
+    @Param('mediaId') mediaId: string,
+    @Token() token?: string,
+  ): Promise<{ success: boolean }> {
+    if (!token) {
+      throw new BadRequestException('JWT token is required');
+    }
+    await this.recipeService.markMediaAsUploaded(mediaId, token);
+    return { success: true };
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FilesInterceptor('files', 2))
   @ApiOperation({
     summary: 'Create a new recipe',
     description:
-      'Create a new recipe. You can provide images either as URLs in JSON body or as files via multipart/form-data. If files are provided, they will be uploaded to media service.',
+      'Create a new recipe with image URLs.\n\n' +
+      '**Two methods for providing images:**\n\n' +
+      '**Method 1: Direct URL (for external images)**\n' +
+      '- Use JSON format with `image.cover` and `image.preview` URLs\n\n' +
+      '**Method 2: Presigned URL Upload (recommended for file uploads)**\n' +
+      '- Call POST /recipes/prepare-upload first to get presigned URLs\n' +
+      '- Upload files directly to S3/MinIO using presigned URLs (PUT request)\n' +
+      '- Call POST /recipes/mark-uploaded/:mediaId for each uploaded file\n' +
+      '- Use returned URLs in `image.cover` and `image.preview` fields',
   })
   @ApiBearerAuth('JWT-auth')
-  @ApiConsumes('multipart/form-data', 'application/json')
-  @ApiBody({
-    type: CreateRecipeDto,
-    description:
-      'Recipe data. For file uploads, use multipart/form-data with fields: name, recipeTypeId, productIds (JSON array), calories, cookAt, stepsConfig (JSON), description (optional), promotionalVideo (optional), coverFile (file), previewFile (file). For URL-based images, use application/json with image.cover and image.preview URLs.',
-  })
+  @ApiBody({ type: CreateRecipeDto })
   @ApiResponse({ status: 201, description: 'Recipe created successfully', type: RecipeResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request - invalid data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -70,25 +121,8 @@ export class RecipeController {
   async create(
     @UserDecorator() user: UserEntity | null,
     @Body() createDto: CreateRecipeDto,
-    @UploadedFiles() files?: Array<MulterFile>,
-    @Token() token?: string,
   ): Promise<RecipeResponseDto> {
     const userId = user?.id || null;
-
-    // Check if files are provided
-    if (files && files.length > 0) {
-      if (!token) {
-        throw new BadRequestException('JWT token is required for file uploads');
-      }
-      const recipe = await this.recipeService.createWithFiles(userId, createDto, files, token);
-      return RecipeMapper.toResponseDto(recipe);
-    }
-
-    // Validate that image URLs are provided if no files
-    if (!createDto.image || (!createDto.image.cover && !createDto.image.preview)) {
-      throw new BadRequestException('Either image URLs or image files must be provided');
-    }
-
     const recipe = await this.recipeService.create(userId, createDto);
     return RecipeMapper.toResponseDto(recipe);
   }
