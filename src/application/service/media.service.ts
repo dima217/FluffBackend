@@ -5,6 +5,7 @@ import type {
   IMediaService,
   CreateMediaDto,
   CreateMediaResponseDto,
+  MediaUrlResponseDto,
 } from '@application/interface/service/media.service';
 import axios, { AxiosInstance } from 'axios';
 import FormData from 'form-data';
@@ -102,6 +103,32 @@ export class MediaService implements IMediaService {
       if (error.response) {
         throw new HttpException(
           error.response.data?.message || 'Failed to upload file',
+          error.response.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      throw new HttpException('Failed to connect to media service', HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
+
+  async getMediaUrls(mediaIds: string[], token: string): Promise<MediaUrlResponseDto[]> {
+    try {
+      this.logger.debug(`Getting URLs for ${mediaIds.length} media files`);
+      const response = await this.httpClient.post<MediaUrlResponseDto[]>(
+        '/media/get-urls',
+        { mediaIds },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      return response.data;
+    } catch (error: any) {
+      this.logger.error(`Failed to get media URLs: ${error.message}`, error.stack);
+      if (error.response) {
+        throw new HttpException(
+          error.response.data?.message || 'Failed to get media URLs',
           error.response.status || HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }

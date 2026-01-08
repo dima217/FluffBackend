@@ -30,17 +30,58 @@ export class RecipeImageDto {
   preview: string;
 }
 
+export class RecipeImageMediaIdsDto {
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439011',
+    description: 'Cover image media ID from prepare-upload response',
+  })
+  @IsString()
+  @IsNotEmpty()
+  coverMediaId: string;
+
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439012',
+    description: 'Preview image media ID from prepare-upload response',
+  })
+  @IsString()
+  @IsNotEmpty()
+  previewMediaId: string;
+}
+
 export class RecipeResourceDto {
   @ApiProperty({ example: 1, description: 'Resource position' })
   @IsNumber()
   position: number;
 
-  @ApiProperty({ example: 'https://example.com/video.mp4', description: 'Resource source URL' })
+  @ApiProperty({
+    example: 'https://example.com/video.mp4',
+    description:
+      'Resource source URL. Use URL from prepare-step-resources-upload response or direct URL',
+  })
   @IsString()
   @IsNotEmpty()
   source: string;
 
-  @ApiProperty({ example: 'video', description: 'Resource type' })
+  @ApiProperty({ example: 'video', description: 'Resource type (e.g., video, image)' })
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+}
+
+export class RecipeResourceMediaIdDto {
+  @ApiProperty({ example: 1, description: 'Resource position' })
+  @IsNumber()
+  position: number;
+
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439013',
+    description: 'Resource media ID from prepare-step-resources-upload response',
+  })
+  @IsString()
+  @IsNotEmpty()
+  mediaId: string;
+
+  @ApiProperty({ example: 'video', description: 'Resource type (e.g., video, image)' })
   @IsString()
   @IsNotEmpty()
   type: string;
@@ -64,12 +105,106 @@ export class RecipeStepDto {
   resources: RecipeResourceDto[];
 }
 
+export class RecipeStepWithMediaIdsDto {
+  @ApiProperty({ example: 'Step 1: Prepare ingredients', description: 'Step name' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ example: 'Chop vegetables and prepare spices', description: 'Step description' })
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @ApiProperty({
+    type: [RecipeResourceMediaIdDto],
+    description: 'Step resources with media IDs (from prepare-step-resources-upload)',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RecipeResourceMediaIdDto)
+  resources: RecipeResourceMediaIdDto[];
+}
+
 export class RecipeStepsConfigDto {
   @ApiProperty({ type: [RecipeStepDto], description: 'Recipe steps' })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RecipeStepDto)
   steps: RecipeStepDto[];
+}
+
+export class RecipeStepsConfigWithMediaIdsDto {
+  @ApiProperty({ type: [RecipeStepWithMediaIdsDto], description: 'Recipe steps with media IDs' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RecipeStepWithMediaIdsDto)
+  steps: RecipeStepWithMediaIdsDto[];
+}
+
+export class CreateRecipeWithMediaIdsDto {
+  @ApiProperty({ example: 'Delicious Pasta', description: 'Recipe name' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ example: 1, description: 'Recipe type ID' })
+  @IsNumber()
+  @IsNotEmpty()
+  recipeTypeId: number;
+
+  @ApiProperty({
+    type: RecipeImageMediaIdsDto,
+    description:
+      'Recipe image media IDs from prepare-upload. Recipe will be created with mediaIds, then updated with URLs after file uploads.',
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => RecipeImageMediaIdsDto)
+  imageMediaIds: RecipeImageMediaIdsDto;
+
+  @ApiPropertyOptional({
+    example: 'https://example.com/promo.mp4',
+    description: 'Promotional video URL',
+  })
+  @IsOptional()
+  @IsString()
+  promotionalVideo?: string;
+
+  @ApiPropertyOptional({ example: 'A delicious pasta recipe', description: 'Recipe description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  productIds: number[];
+
+  @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
+  @IsOptional()
+  @Type(() => Date)
+  fluffAt?: Date;
+
+  @ApiProperty({ example: 500, description: 'Calories count' })
+  @IsNumber()
+  @Min(0)
+  calories: number;
+
+  @ApiProperty({ example: 3600, description: 'Cooking time in seconds' })
+  @IsNumber()
+  @Min(0)
+  cookAt: number;
+
+  @ApiProperty({
+    type: RecipeStepsConfigWithMediaIdsDto,
+    description:
+      'Recipe steps configuration with media IDs. Resources should use mediaId instead of source URL',
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => RecipeStepsConfigWithMediaIdsDto)
+  stepsConfig: RecipeStepsConfigWithMediaIdsDto;
 }
 
 export class CreateRecipeDto {
@@ -85,7 +220,8 @@ export class CreateRecipeDto {
 
   @ApiProperty({
     type: RecipeImageDto,
-    description: 'Recipe images (URLs). Use presigned URLs from POST /recipes/prepare-upload or direct URLs',
+    description:
+      'Recipe images (URLs). Use presigned URLs from POST /recipes/prepare-upload or direct URLs',
   })
   @IsObject()
   @ValidateNested()
@@ -125,7 +261,11 @@ export class CreateRecipeDto {
   @Min(0)
   cookAt: number;
 
-  @ApiProperty({ type: RecipeStepsConfigDto, description: 'Recipe steps configuration' })
+  @ApiProperty({
+    type: RecipeStepsConfigDto,
+    description:
+      'Recipe steps configuration. For resources in steps, use URLs from prepare-step-resources-upload or direct URLs',
+  })
   @IsObject()
   @ValidateNested()
   @Type(() => RecipeStepsConfigDto)
@@ -164,6 +304,110 @@ export class PrepareUploadDto {
   @IsNumber()
   @Min(1)
   previewSize: number;
+}
+
+export class PrepareStepResourceUploadItemDto {
+  @ApiProperty({
+    example: 'step1-video.mp4',
+    description: 'Resource filename',
+  })
+  @IsString()
+  @IsNotEmpty()
+  filename: string;
+
+  @ApiProperty({
+    example: 5242880,
+    description: 'Resource file size in bytes',
+  })
+  @IsNumber()
+  @Min(1)
+  size: number;
+
+  @ApiProperty({
+    example: 'video',
+    description: 'Resource type (e.g., video, image)',
+  })
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Resource position in step',
+  })
+  @IsNumber()
+  position: number;
+}
+
+export class PrepareStepResourcesUploadDto {
+  @ApiProperty({
+    type: [PrepareStepResourceUploadItemDto],
+    description: 'Array of step resources to upload',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PrepareStepResourceUploadItemDto)
+  resources: PrepareStepResourceUploadItemDto[];
+}
+
+export class StepResourceUploadResponseDto {
+  @ApiProperty({
+    example: '507f1f77bcf86cd799439011',
+    description: 'Media ID',
+  })
+  mediaId: string;
+
+  @ApiProperty({
+    example: 'https://minio.example.com/bucket/user123/step1-video.mp4?X-Amz-Algorithm=...',
+    description: 'Presigned URL for resource upload',
+  })
+  uploadUrl: string;
+
+  @ApiProperty({
+    example: '/user123/step1-video.mp4',
+    description: 'Resource URL (use this in recipe creation)',
+  })
+  url: string;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Resource position in step',
+  })
+  position: number;
+
+  @ApiProperty({
+    example: 'video',
+    description: 'Resource type',
+  })
+  type: string;
+}
+
+export class PrepareStepResourcesUploadResponseDto {
+  @ApiProperty({
+    type: [StepResourceUploadResponseDto],
+    description: 'Array of presigned URLs for step resources',
+  })
+  resources: StepResourceUploadResponseDto[];
+}
+
+export class ConfirmRecipeUploadDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Recipe ID from create-with-media-ids response',
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  recipeId: number;
+
+  @ApiProperty({
+    type: [String],
+    example: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
+    description: 'Array of all media IDs that were uploaded (cover, preview, and step resources)',
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty()
+  mediaIds: string[];
 }
 
 export class PrepareUploadResponseDto {

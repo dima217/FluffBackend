@@ -37,7 +37,11 @@ export class UserController {
 	@Post('sign-up')
 	@Public()
 	@HttpCode(HttpStatus.CREATED)
-	@ApiOperation({ summary: 'Complete user registration', description: 'Register new user with verification code' })
+	@ApiOperation({
+		summary: 'Complete user registration',
+		description:
+			'Register new user with verification code. Required fields for calorie tracking: gender, birthDate (for age calculation), height, and weight.',
+	})
 	@ApiBody({ type: UserSignUpDto })
 	@ApiResponse({ status: 201, description: 'User registered successfully', type: JwtTokensDto })
 	@ApiResponse({ status: 400, description: 'Bad request - invalid data or code' })

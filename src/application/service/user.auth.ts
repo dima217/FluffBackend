@@ -277,7 +277,15 @@ export class UserAuthService implements IUserAuthService {
     const userEntity = UserMapper.toEntity(user, encryptedPassword);
     const userSaved = await this.userRepository.create(userEntity);
 
-    const profileEntity = ProfileMapper.toEntity(userSaved);
+    const profileData = {
+      birthDate: user.birthDate,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      bio: '',
+      photo: '',
+    };
+    const profileEntity = ProfileMapper.toEntity(userSaved, profileData);
     await this.profileRepository.create(userSaved.id, profileEntity);
 
     const [refreshToken, expiresAt] = this.userDomainService.createRefreshToken(userSaved);

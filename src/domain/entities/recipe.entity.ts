@@ -19,6 +19,11 @@ export interface RecipeImage {
   preview: string;
 }
 
+export interface RecipeImageMediaIds {
+  coverMediaId: string;
+  previewMediaId: string;
+}
+
 export interface RecipeResource {
   position: number;
   source: string;
@@ -60,6 +65,9 @@ export class Recipe {
 
   @Column('jsonb', { nullable: false })
   image: RecipeImage;
+
+  @Column('jsonb', { nullable: true })
+  imageMediaIds: RecipeImageMediaIds | null;
 
   @Column('varchar', { nullable: true })
   promotionalVideo: string | null;
