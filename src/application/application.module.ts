@@ -6,6 +6,7 @@ import { RecipeService } from "./service/recipe.service";
 import { ProductService } from "./service/product.service";
 import { FavoriteService } from "./service/favorite.service";
 import { TrackingService } from "./service/tracking.service";
+import { MediaService } from "./service/media.service";
 import { NotificationRegistrationObservable } from "./service/observable/notification.service";
 import { PasswordChangeNotificationObservable } from "./service/observable/password-change-notification.service";
 import { OAuthModule } from "./service/oauth/oauth.module";
@@ -48,6 +49,7 @@ import { ProductFavoriteCountProcess } from "./service/process/product-favorite-
 		RecipeService,
 		ProductService,
 		TrackingService,
+		MediaService,
 		RecipeFavoriteCountProcess,
 		ProductFavoriteCountProcess,
 		{
