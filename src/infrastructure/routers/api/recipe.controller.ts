@@ -41,6 +41,7 @@ import { User as UserDecorator } from '@infrastructure/decorator/user.decorator'
 import { Token } from '@infrastructure/decorator/token.decorator';
 import { Public } from '@infrastructure/decorator/public.decorator';
 import type { User as UserEntity } from '@domain/entities/user.entity';
+import { PaginationQueryDto, PaginatedResponseDto } from '@application/dto/pagination.dto';
 
 @ApiTags('Recipes')
 @Controller('recipes')
@@ -249,17 +250,77 @@ export class RecipeController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @Public()
-  @ApiOperation({ summary: 'Get all recipes', description: 'Retrieve all recipes' })
+  @ApiOperation({
+    summary: 'Get all recipes',
+    description:
+      'Retrieve all recipes with pagination support.\n\n' +
+      '**Pagination:**\n' +
+      '- Use `page` query parameter to specify page number (1-based, default: 1)\n' +
+      '- Use `limit` query parameter to specify items per page (1-100, default: 10)\n' +
+      '- Response includes `data` array and `meta` object with pagination information\n\n' +
+      '**Example requests:**\n' +
+      '- `GET /recipes` - Returns first 10 recipes (default)\n' +
+      '- `GET /recipes?page=1&limit=20` - Returns first 20 recipes\n' +
+      '- `GET /recipes?page=2&limit=10` - Returns recipes 11-20',
+  })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number (1-based indexing). First page is 1. Default: 1',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Number of items per page. Maximum value is 100. Default: 10',
+    example: 10,
+  })
   @ApiResponse({
     status: 200,
-    description: 'Recipes retrieved successfully',
-    type: [RecipeResponseDto],
+    description: 'Recipes retrieved successfully with pagination metadata',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Array of recipes for the current page',
+          items: { $ref: '#/components/schemas/RecipeResponseDto' },
+        },
+        meta: {
+          type: 'object',
+          description: 'Pagination metadata',
+          properties: {
+            page: { type: 'number', description: 'Current page number', example: 1 },
+            limit: { type: 'number', description: 'Items per page', example: 10 },
+            total: { type: 'number', description: 'Total number of items', example: 100 },
+            totalPages: { type: 'number', description: 'Total number of pages', example: 10 },
+          },
+        },
+      },
+    },
   })
-  async findAll(@UserDecorator() user: UserEntity | null): Promise<RecipeResponseDto[]> {
+  async findAll(
+    @UserDecorator() user: UserEntity | null,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseDto<RecipeResponseDto>> {
     const userId = user?.id || null;
-    const recipes = await this.recipeService.findAll(userId);
+    const page = paginationQuery.page || 1;
+    const limit = paginationQuery.limit || 10;
+    const result = await this.recipeService.findAll(userId, page, limit);
     const favoriteIds = await this.recipeService.getFavoriteIds(userId);
-    return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data: RecipeMapper.toResponseDtoList(result.data, favoriteIds),
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+      },
+    };
   }
 
   @Get('my')
@@ -297,6 +358,93 @@ export class RecipeController {
   async findFavorites(@UserDecorator() user: UserEntity): Promise<RecipeResponseDto[]> {
     const recipes = await this.recipeService.findFavoritesByUserId(user.id);
     const favoriteIds = await this.recipeService.getFavoriteIds(user.id);
+    return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
+  }
+
+  @Get('search')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @ApiOperation({
+    summary: 'Search recipes',
+    description:
+      'Search recipes by products and/or name. You can search by product IDs, product names, recipe name, or combine them.\n\n' +
+      '**Search methods:**\n' +
+      '1. **By product IDs**: Pass `productIds` parameter with comma-separated IDs (e.g., `?productIds=1,2,3`)\n' +
+      '2. **By product names**: Pass `q` parameter with product names (e.g., `?q=молоко, яйца`)\n' +
+      '3. **By recipe name**: Pass `q` parameter with recipe name (e.g., `?q=омлет`)\n' +
+      '4. **Combined**: Pass both `productIds` and `q` to search by products AND recipe name\n\n' +
+      '**Search logic:**\n' +
+      '- If `productIds` is provided: searches recipes containing those products (AND with recipe name if `q` is also provided)\n' +
+      '- If only `q` is provided:\n' +
+      '  - First tries to find products with exact name matches\n' +
+      '  - If exact matches found: returns recipes containing those products AND matching recipe name\n' +
+      '  - If no exact matches: searches for partial product name matches and recipe name (OR logic)\n\n' +
+      '**Examples:**\n' +
+      '- `GET /recipes/search?productIds=1,2,3` - Find recipes with products 1, 2, and 3\n' +
+      '- `GET /recipes/search?q=молоко, яйца` - Find recipes by product names\n' +
+      '- `GET /recipes/search?productIds=1,2&q=омлет` - Find recipes with products 1,2 AND name containing "омлет"',
+  })
+  @ApiQuery({
+    name: 'q',
+    type: String,
+    required: false,
+    description:
+      'Search query (product names and/or recipe name, e.g., "молоко, яйца" or "омлет"). Optional if productIds is provided.',
+    example: 'молоко, яйца',
+  })
+  @ApiQuery({
+    name: 'productIds',
+    type: String,
+    required: false,
+    description: 'Comma-separated list of product IDs (e.g., "1,2,3"). Optional if q is provided.',
+    example: '1,2,3',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recipes found successfully',
+    type: [RecipeResponseDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - both q and productIds are missing, or invalid productIds format',
+  })
+  async search(
+    @Query('q') searchQuery: string | undefined,
+    @Query('productIds') productIdsParam: string | undefined,
+    @UserDecorator() user: UserEntity | null,
+  ): Promise<RecipeResponseDto[]> {
+    // Проверяем, что передан хотя бы один параметр
+    if ((!searchQuery || searchQuery.trim().length === 0) && !productIdsParam) {
+      throw new BadRequestException('Either search query (q) or productIds parameter is required');
+    }
+
+    // Парсим productIds если передан
+    let productIds: number[] | undefined = undefined;
+    if (productIdsParam) {
+      productIds = productIdsParam
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0)
+        .map((id) => {
+          const parsedId = parseInt(id, 10);
+          if (isNaN(parsedId) || parsedId <= 0) {
+            throw new BadRequestException(`Invalid product ID: ${id}`);
+          }
+          return parsedId;
+        });
+
+      if (productIds.length === 0) {
+        throw new BadRequestException('At least one valid product ID is required');
+      }
+    }
+
+    const userId = user?.id || null;
+    const recipes = await this.recipeService.search(
+      searchQuery?.trim() || '',
+      userId,
+      productIds,
+    );
+    const favoriteIds = await this.recipeService.getFavoriteIds(userId);
     return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
   }
 

@@ -18,36 +18,69 @@ export class TrackingRepositoryAdapter implements ITrackingRepository {
 		return await this.repository.save(newTracking);
 	}
 
-	async findOne(id: number): Promise<Tracking> {
-		const tracking = await this.repository.findOne({ where: { id } });
+	async findOne(id: number, userId?: number): Promise<Tracking> {
+		const where: any = { id };
+		if (userId !== undefined) {
+			where.user = { id: userId };
+		}
+		const tracking = await this.repository.findOne({
+			where,
+			relations: ['user', 'recipe'],
+		});
 		if (!tracking) {
 			throw new NotFoundEntityException('Tracking');
 		}
 		return tracking;
 	}
 
-	async findAll(): Promise<Tracking[]> {
-		return await this.repository.find();
+	async findAll(userId?: number): Promise<Tracking[]> {
+		const where = userId !== undefined ? { user: { id: userId } } : {};
+		return await this.repository.find({
+			where,
+			relations: ['user', 'recipe'],
+			order: { created: 'DESC' },
+		});
 	}
 
-	async update(id: number, tracking: Partial<Tracking>): Promise<Tracking> {
-		const existingTracking = await this.findOne(id);
+	async findByDateRange(dateStart: Date, dateEnd: Date, userId: number): Promise<Tracking[]> {
+		return await this.repository
+			.createQueryBuilder('tracking')
+			.leftJoinAndSelect('tracking.user', 'user')
+			.leftJoinAndSelect('tracking.recipe', 'recipe')
+			.where('tracking.user_id = :userId', { userId })
+			.andWhere('DATE(tracking.created) >= DATE(:dateStart)', { dateStart })
+			.andWhere('DATE(tracking.created) <= DATE(:dateEnd)', { dateEnd })
+			.orderBy('tracking.created', 'ASC')
+			.getMany();
+	}
+
+	async update(id: number, tracking: Partial<Tracking>, userId?: number): Promise<Tracking> {
+		const existingTracking = await this.findOne(id, userId);
 		Object.assign(existingTracking, tracking);
 		return await this.repository.save(existingTracking);
 	}
 
-	async delete(id: number): Promise<void> {
-		await this.findOne(id);
+	async delete(id: number, userId?: number): Promise<void> {
+		await this.findOne(id, userId);
 		await this.repository.delete(id);
 	}
 
-	async getDateStatistics(dateStart: Date, dateEnd: Date): Promise<{ totalCalories: number }> {
-		const result = await this.repository
+	async getDateStatistics(
+		dateStart: Date,
+		dateEnd: Date,
+		userId?: number,
+	): Promise<{ totalCalories: number }> {
+		const queryBuilder = this.repository
 			.createQueryBuilder('tracking')
 			.select('COALESCE(SUM(tracking.calories), 0)', 'total')
 			.where('tracking.created >= :dateStart', { dateStart })
-			.andWhere('tracking.created <= :dateEnd', { dateEnd })
-			.getRawOne();
+			.andWhere('tracking.created <= :dateEnd', { dateEnd });
+
+		if (userId !== undefined) {
+			queryBuilder.andWhere('tracking.user_id = :userId', { userId });
+		}
+
+		const result = await queryBuilder.getRawOne();
 
 		return {
 			totalCalories: Number(result?.total || 0),

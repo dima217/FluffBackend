@@ -40,9 +40,10 @@ export interface IRecipeService {
   ): Promise<PrepareVideoUploadResponseDto>;
   markMediaAsUploaded(mediaId: string, token: string): Promise<void>;
   findOne(id: number): Promise<Recipe>;
-  findAll(userId?: number | null): Promise<Recipe[]>;
+  findAll(userId?: number | null, page?: number, limit?: number): Promise<{ data: Recipe[]; total: number }>;
   findByUserId(userId: number): Promise<Recipe[]>;
   findFavoritesByUserId(userId: number): Promise<Recipe[]>;
+  search(searchQuery: string, userId?: number | null, productIds?: number[]): Promise<Recipe[]>;
   update(id: number, userId: number | null, updateDto: UpdateRecipeDto): Promise<Recipe>;
   delete(id: number, userId: number | null): Promise<void>;
 }

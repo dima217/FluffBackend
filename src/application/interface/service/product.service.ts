@@ -23,8 +23,10 @@ export interface IProductService {
   ): Promise<PrepareProductUploadResponseDto>;
   markMediaAsUploaded(mediaId: string, token: string): Promise<void>;
   findOne(id: number, userId?: number | null): Promise<Product>;
-  findAll(userId?: number | null): Promise<Product[]>;
+  findAll(userId?: number | null, page?: number, limit?: number): Promise<{ data: Product[]; total: number }>;
+  findByIds(ids: number[], userId?: number | null): Promise<Product[]>;
   findFavoritesByUserId(userId: number): Promise<Product[]>;
+  search(searchQuery: string, userId?: number | null): Promise<Product[]>;
   update(id: number, updateDto: UpdateProductDto): Promise<Product>;
   delete(id: number): Promise<void>;
 }

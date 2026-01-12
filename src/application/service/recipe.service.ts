@@ -291,9 +291,16 @@ export class RecipeService implements IRecipeService {
     return await this.recipeRepository.findOne(id);
   }
 
-  async findAll(userId?: number | null): Promise<Recipe[]> {
-    this.logger.log('Finding all recipes');
-    return await this.recipeRepository.findAll();
+  async findAll(
+    userId?: number | null,
+    page?: number,
+    limit?: number,
+  ): Promise<{ data: Recipe[]; total: number }> {
+    this.logger.log(
+      `Finding all recipes${page && limit ? ` (page: ${page}, limit: ${limit})` : ''}`,
+    );
+    const options = page && limit ? { page, limit } : undefined;
+    return await this.recipeRepository.findAll(options);
   }
 
   async findByUserId(userId: number): Promise<Recipe[]> {
@@ -324,6 +331,95 @@ export class RecipeService implements IRecipeService {
         .filter((f) => f.relatedEntityType === RelatedEntityType.RECIPE)
         .map((f) => f.relatedEntityId),
     );
+  }
+
+  async search(
+    searchQuery: string,
+    userId?: number | null,
+    productIds?: number[],
+  ): Promise<Recipe[]> {
+    this.logger.log(
+      `Searching recipes with query: ${searchQuery}${productIds ? `, productIds: [${productIds.join(', ')}]` : ''}`,
+    );
+
+    // Если передан список ID продуктов, используем их напрямую
+    let finalProductIds: number[] = [];
+    let recipeNameSearchTerm: string | undefined = undefined;
+    let useOr = false;
+
+    if (productIds && productIds.length > 0) {
+      // Если переданы ID продуктов, используем их напрямую
+      finalProductIds = productIds;
+      this.logger.log(`Using provided product IDs: [${finalProductIds.join(', ')}]`);
+
+      // Если также передан текстовый запрос, используем его для поиска по названию
+      if (searchQuery && searchQuery.trim().length > 0) {
+        recipeNameSearchTerm = searchQuery.trim();
+        // При использовании ID продуктов используем AND логику (продукты И название)
+        useOr = false;
+      } else {
+        // Если только ID продуктов без текста - ищем только по продуктам
+        recipeNameSearchTerm = undefined;
+        useOr = false;
+      }
+    } else {
+      // Если ID продуктов не переданы, ищем по текстовому запросу как раньше
+      if (!searchQuery || searchQuery.trim().length === 0) {
+        return [];
+      }
+
+      // Разбиваем запрос на отдельные слова/фразы (по запятой или пробелу)
+      const searchTerms = searchQuery
+        .split(/[,\s]+/)
+        .map((term) => term.trim())
+        .filter((term) => term.length > 0);
+
+      if (searchTerms.length === 0) {
+        return [];
+      }
+
+      // Ищем продукты с точным совпадением
+      const exactMatchProducts = await Promise.all(
+        searchTerms.map((term) => this.productRepository.searchByName(term, true)),
+      );
+      const exactProducts = exactMatchProducts.flat();
+      const exactProductIds = exactProducts.map((p) => p.id);
+
+      // Если есть точные совпадения - используем только их
+      if (exactProductIds.length > 0) {
+        this.logger.log(`Found ${exactProductIds.length} products with exact match`);
+        finalProductIds = exactProductIds;
+      } else {
+        // Если нет точных совпадений - ищем частичные
+        const partialMatchProducts = await Promise.all(
+          searchTerms.map((term) => this.productRepository.searchByName(term, false)),
+        );
+        const partialProducts = partialMatchProducts.flat();
+        // Убираем дубликаты
+        const uniquePartialProducts = Array.from(
+          new Map(partialProducts.map((p) => [p.id, p])).values(),
+        );
+        finalProductIds = uniquePartialProducts.map((p) => p.id);
+        this.logger.log(`Found ${finalProductIds.length} products with partial match`);
+      }
+
+      // Объединяем все поисковые термины для поиска по названию рецепта
+      recipeNameSearchTerm = searchTerms.join(' ');
+
+      // Если есть точные совпадения продуктов - используем AND (продукты И название)
+      // Если нет точных совпадений - используем OR (продукты ИЛИ название)
+      useOr = exactProductIds.length === 0;
+    }
+
+    // Ищем рецепты по продуктам и названию
+    const recipes = await this.recipeRepository.searchByProductsAndName(
+      finalProductIds,
+      recipeNameSearchTerm,
+      useOr,
+    );
+
+    this.logger.log(`Found ${recipes.length} recipes matching search criteria`);
+    return recipes;
   }
 
   async update(id: number, userId: number | null, updateDto: UpdateRecipeDto): Promise<Recipe> {

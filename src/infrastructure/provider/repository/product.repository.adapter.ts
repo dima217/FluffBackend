@@ -26,8 +26,22 @@ export class ProductRepositoryAdapter implements IProductRepository {
 		return product;
 	}
 
-	async findAll(): Promise<Product[]> {
-		return await this.repository.find();
+	async findAll(options?: { page: number; limit: number }): Promise<{ data: Product[]; total: number }> {
+		if (!options) {
+			// If no pagination options provided, return all products (backward compatibility)
+			const data = await this.repository.find();
+			return { data, total: data.length };
+		}
+
+		const { page, limit } = options;
+		const skip = (page - 1) * limit;
+
+		const [data, total] = await this.repository.findAndCount({
+			skip,
+			take: limit,
+		});
+
+		return { data, total };
 	}
 
 	async findByIds(ids: number[]): Promise<Product[]> {
@@ -37,6 +51,24 @@ export class ProductRepositoryAdapter implements IProductRepository {
 		return await this.repository.find({
 			where: ids.map((id) => ({ id })),
 		});
+	}
+
+	async searchByName(searchTerm: string, exactMatch: boolean = false): Promise<Product[]> {
+		if (!searchTerm || searchTerm.trim().length === 0) {
+			return [];
+		}
+		const trimmedTerm = searchTerm.trim();
+		if (exactMatch) {
+			return await this.repository.find({
+				where: { name: trimmedTerm },
+			});
+		}
+		return await this.repository
+			.createQueryBuilder('product')
+			.where('LOWER(product.name) LIKE LOWER(:searchTerm)', {
+				searchTerm: `%${trimmedTerm}%`,
+			})
+			.getMany();
 	}
 
 	async update(id: number, product: Partial<Product>): Promise<Product> {

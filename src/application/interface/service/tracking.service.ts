@@ -1,12 +1,21 @@
 import { Tracking } from '@domain/entities/tracking.entity';
-import { CreateTrackingDto, UpdateTrackingDto, DayStatisticsResponseDto } from '@application/dto/tracking.dto';
+import {
+  CreateTrackingDto,
+  UpdateTrackingDto,
+  DayStatisticsResponseDto,
+  CalendarTrackingResponseDto,
+} from '@application/dto/tracking.dto';
 
 export interface ITrackingService {
-	create(createDto: CreateTrackingDto): Promise<Tracking>;
-	findOne(id: number): Promise<Tracking>;
-	findAll(): Promise<Tracking[]>;
-	update(id: number, updateDto: UpdateTrackingDto): Promise<Tracking>;
-	delete(id: number): Promise<void>;
-	getDayStatistics(dateStart: string, dateEnd: string): Promise<DayStatisticsResponseDto>;
+  create(userId: number, createDto: CreateTrackingDto): Promise<Tracking>;
+  findOne(id: number, userId: number): Promise<Tracking>;
+  findAll(userId: number): Promise<Tracking[]>;
+  getCurrentMonthCalendar(userId: number): Promise<CalendarTrackingResponseDto>;
+  update(id: number, userId: number, updateDto: UpdateTrackingDto): Promise<Tracking>;
+  delete(id: number, userId: number): Promise<void>;
+  getDayStatistics(
+    userId: number,
+    dateStart: string,
+    dateEnd: string,
+  ): Promise<DayStatisticsResponseDto>;
 }
-

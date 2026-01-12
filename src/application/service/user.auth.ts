@@ -9,11 +9,20 @@ import type { ISendCodeProvider } from '@application/interface/provider/code.pro
 import type { ICodeService } from '@application/interface/service/code.serviece';
 import { IUserAuthService } from '@application/interface/service/user.auth';
 import { Code } from '@domain/entities/code.entity';
-import { EmailAlreadyExistsException, InvalidCodeException } from '@domain/exceptions/user.exception';
+import {
+  EmailAlreadyExistsException,
+  InvalidCodeException,
+} from '@domain/exceptions/user.exception';
 import { NotFoundEntityException } from '@domain/exceptions/entity.exceptions';
 import type { IUserRepository } from '@domain/interface/user.repository';
 import { DomainUserService } from '@domain/service/user.serviece';
-import { Inject, Injectable, UnauthorizedException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { User as UserEntity } from '@domain/entities/user.entity';
 import { Profile } from '@domain/entities/profile.entity';
 import { Token } from '@domain/entities/token.entity';
@@ -54,20 +63,24 @@ export class UserAuthService implements IUserAuthService {
     private readonly notificationRegistrationObservable: NotificationRegistrationObservable,
 
     private readonly passwordChangeNotificationObservable: PasswordChangeNotificationObservable,
-  ) { }
+  ) {}
   async recoveryInit(username: string): Promise<void> {
     this.logger.log(`Recovery init requested for username: ${username}`);
     const userFound = await this.userRepository.findOneByUsername(username);
     const code = await this.codeService.generateCode(userFound.email, Code.Types.recovery);
     this.logger.log(`Generated recovery code ${code.code} for user: ${userFound.email}`);
-    this.sendCodeProvider.sendCode({
-      email: userFound.email,
-      code: code.code,
-      type: code.type,
-      expirationDate: code.expirationDate,
-    }).catch((error) => {
-      this.logger.error(`Failed to send recovery code to ${userFound.email}: ${error instanceof Error ? error.message : String(error)}`);
-    });
+    this.sendCodeProvider
+      .sendCode({
+        email: userFound.email,
+        code: code.code,
+        type: code.type,
+        expirationDate: code.expirationDate,
+      })
+      .catch((error) => {
+        this.logger.error(
+          `Failed to send recovery code to ${userFound.email}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
   }
   async recoveryConfirm(user: UserRecoveryConfirmDto, auditContext?: AuditContext): Promise<void> {
     this.logger.log(`Recovery confirm requested for username: ${user.username}`);
@@ -91,7 +104,11 @@ export class UserAuthService implements IUserAuthService {
       throw new InvalidCodeException();
     }
 
-    const isValidCode = await this.codeService.verifyCode(user.username, user.code, Code.Types.recovery);
+    const isValidCode = await this.codeService.verifyCode(
+      user.username,
+      user.code,
+      Code.Types.recovery,
+    );
     if (!isValidCode) {
       this.logger.warn(`Invalid recovery code for username: ${user.username}`);
       // Log failed password change attempt - invalid code
@@ -109,7 +126,9 @@ export class UserAuthService implements IUserAuthService {
     }
 
     const encryptedPassword = this.userDomainService.encryptPassword(user.password);
-    const updatedUser = await this.userRepository.update(userFound.id, { password: encryptedPassword });
+    const updatedUser = await this.userRepository.update(userFound.id, {
+      password: encryptedPassword,
+    });
     this.logger.log(`Password updated for user: ${user.username}`);
 
     // Log successful password change
@@ -125,7 +144,9 @@ export class UserAuthService implements IUserAuthService {
 
     // Send password change notification email
     this.passwordChangeNotificationObservable.accept(updatedUser).catch((error) => {
-      this.logger.error(`Failed to send password change notification: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Failed to send password change notification: ${error instanceof Error ? error.message : String(error)}`,
+      );
     });
   }
   async signIn(user: UserLoginDto, auditContext?: AuditContext): Promise<JwtTokensDto> {
@@ -188,7 +209,6 @@ export class UserAuthService implements IUserAuthService {
     await this.tokenRepository.deleteByUserId(userId);
     this.logger.log(`User ${userId} signed out successfully`);
 
-    // Логируем выход
     if (auditContext) {
       this.auditLogService.createLog(
         AuditLogMapper.toCreateDto(AuditLogAction.SIGN_OUT, auditContext, {
@@ -217,14 +237,18 @@ export class UserAuthService implements IUserAuthService {
     if (!existUser) {
       const code = await this.codeService.generateCode(user.email, Code.Types.signup);
       this.logger.log(`Generated signup code ${code.code} for email: ${user.email}`);
-      this.sendCodeProvider.sendCode({
-        email: user.email,
-        code: code.code,
-        type: code.type,
-        expirationDate: code.expirationDate,
-      }).catch((error) => {
-        this.logger.error(`Failed to send signup code to ${user.email}: ${error instanceof Error ? error.message : String(error)}`);
-      });
+      this.sendCodeProvider
+        .sendCode({
+          email: user.email,
+          code: code.code,
+          type: code.type,
+          expirationDate: code.expirationDate,
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Failed to send signup code to ${user.email}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
 
       if (auditContext) {
         this.auditLogService.createLog(
@@ -305,7 +329,9 @@ export class UserAuthService implements IUserAuthService {
     }
 
     this.notificationRegistrationObservable.accept(userSaved).catch((error) => {
-      this.logger.error(`Failed to send registration notification: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Failed to send registration notification: ${error instanceof Error ? error.message : String(error)}`,
+      );
     });
 
     return this.userDomainService.createJwtTokens(token);

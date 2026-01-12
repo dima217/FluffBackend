@@ -7,6 +7,7 @@ import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { networkInterfaces } from 'os';
 import * as express from 'express';
+import { SwaggerJsonFilter } from '@infrastructure/filters/swagger-json.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -39,6 +40,13 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.getHttpAdapter().get('/api-json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(document);
+  });
+
+  app.useGlobalFilters(new SwaggerJsonFilter(document));
 
   const configService = app.get<ConfigService<AppConfig>>(ConfigService);
   const appConfig = configService.get<AppConfig>('app', { infer: true });

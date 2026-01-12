@@ -6,10 +6,11 @@ export interface DateStatistics {
 
 export interface ITrackingRepository {
 	create(tracking: Tracking): Promise<Tracking>;
-	findOne(id: number): Promise<Tracking>;
-	findAll(): Promise<Tracking[]>;
-	update(id: number, tracking: Partial<Tracking>): Promise<Tracking>;
-	delete(id: number): Promise<void>;
-	getDateStatistics(dateStart: Date, dateEnd: Date): Promise<DateStatistics>;
+	findOne(id: number, userId?: number): Promise<Tracking>;
+	findAll(userId?: number): Promise<Tracking[]>;
+	findByDateRange(dateStart: Date, dateEnd: Date, userId: number): Promise<Tracking[]>;
+	update(id: number, tracking: Partial<Tracking>, userId?: number): Promise<Tracking>;
+	delete(id: number, userId?: number): Promise<void>;
+	getDateStatistics(dateStart: Date, dateEnd: Date, userId?: number): Promise<DateStatistics>;
 }
 
