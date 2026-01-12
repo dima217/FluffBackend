@@ -439,11 +439,7 @@ export class RecipeController {
     }
 
     const userId = user?.id || null;
-    const recipes = await this.recipeService.search(
-      searchQuery?.trim() || '',
-      userId,
-      productIds,
-    );
+    const recipes = await this.recipeService.search(searchQuery?.trim() || '', userId, productIds);
     const favoriteIds = await this.recipeService.getFavoriteIds(userId);
     return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
   }
