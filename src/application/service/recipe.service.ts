@@ -60,9 +60,19 @@ export class RecipeService implements IRecipeService {
       throw new NotFoundException(`RecipeType with ID ${createDto.recipeTypeId} not found`);
     }
 
-    const products = await Promise.all(
-      createDto.productIds.map((id) => this.productRepository.findOne(id)),
-    );
+    // Validate that at least one of productIds or customProducts is provided
+    if (
+      (!createDto.productIds || createDto.productIds.length === 0) &&
+      (!createDto.customProducts || createDto.customProducts.length === 0)
+    ) {
+      throw new BadRequestException('Either productIds or customProducts must be provided');
+    }
+
+    // Fetch products from database if productIds are provided
+    const products =
+      createDto.productIds && createDto.productIds.length > 0
+        ? await Promise.all(createDto.productIds.map((id) => this.productRepository.findOne(id)))
+        : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
 
@@ -81,9 +91,19 @@ export class RecipeService implements IRecipeService {
       throw new NotFoundException(`RecipeType with ID ${createDto.recipeTypeId} not found`);
     }
 
-    const products = await Promise.all(
-      createDto.productIds.map((id) => this.productRepository.findOne(id)),
-    );
+    // Validate that at least one of productIds or customProducts is provided
+    if (
+      (!createDto.productIds || createDto.productIds.length === 0) &&
+      (!createDto.customProducts || createDto.customProducts.length === 0)
+    ) {
+      throw new BadRequestException('Either productIds or customProducts must be provided');
+    }
+
+    // Fetch products from database if productIds are provided
+    const products =
+      createDto.productIds && createDto.productIds.length > 0
+        ? await Promise.all(createDto.productIds.map((id) => this.productRepository.findOne(id)))
+        : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
 
@@ -465,6 +485,11 @@ export class RecipeService implements IRecipeService {
         updateDto.productIds.map((productId) => this.productRepository.findOne(productId)),
       );
       updateData.products = products;
+    }
+
+    if (updateDto.customProducts !== undefined) {
+      updateData.customProducts =
+        updateDto.customProducts.length > 0 ? updateDto.customProducts : null;
     }
 
     if (updateDto.fluffAt !== undefined) {

@@ -176,10 +176,22 @@ export class CreateRecipeWithMediaIdsDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
+  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
   @IsArray()
   @IsNumber({}, { each: true })
-  productIds: number[];
+  @IsOptional()
+  productIds?: number[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['молоко', 'яйца', 'сахар'],
+    description:
+      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  customProducts?: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -241,10 +253,22 @@ export class CreateRecipeDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
+  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
   @IsArray()
   @IsNumber({}, { each: true })
-  productIds: number[];
+  @IsOptional()
+  productIds?: number[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['молоко', 'яйца', 'сахар'],
+    description:
+      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  customProducts?: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -519,11 +543,22 @@ export class UpdateRecipeDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
+  @ApiPropertyOptional({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
   @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })
   productIds?: number[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['молоко', 'яйца', 'сахар'],
+    description:
+      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  customProducts?: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -593,6 +628,13 @@ export class RecipeResponseDto {
 
   @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
   products: number[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['молоко', 'яйца', 'сахар'],
+    description: 'Custom product names entered by user (arbitrary strings)',
+  })
+  customProducts: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   fluffAt: Date | null;

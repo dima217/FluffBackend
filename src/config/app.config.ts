@@ -39,6 +39,6 @@ export default registerAs('app', () => ({
     port: Number(process.env.REDIS_PORT ?? 6379),
   },
   media: {
-    baseUrl: process.env.MEDIA_SERVICE_URL ?? 'http://localhost:3001',
+    baseUrl: process.env.MEDIA_SERVICE_URL ?? 'http://localhost:3002',
   },
 }));

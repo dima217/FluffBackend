@@ -86,6 +86,9 @@ export class Recipe {
   })
   products: Product[];
 
+  @Column('jsonb', { nullable: true })
+  customProducts: string[] | null;
+
   @Column('timestamp', { nullable: true })
   fluffAt: Date | null;
 

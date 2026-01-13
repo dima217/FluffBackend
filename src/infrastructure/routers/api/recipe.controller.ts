@@ -114,6 +114,39 @@ export class RecipeController {
     return await this.recipeService.prepareStepResourcesUpload(userId, prepareDto, token);
   }
 
+  @Post('prepare-video-upload')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Prepare upload URL for promotional video',
+    description:
+      'Get presigned URL for direct upload to S3/MinIO for promotional video. Use this endpoint before creating a recipe with promotional video upload.\n\n' +
+      '**Workflow:**\n' +
+      '1. Call this endpoint to get presigned URL for promotional video\n' +
+      '2. Upload file directly to S3/MinIO using the presigned URL (PUT request with file content)\n' +
+      '3. Call POST /recipes/mark-uploaded/{mediaId} for the uploaded file\n' +
+      '4. Create recipe using the returned URL in promotionalVideoMediaId field (for create-with-media-ids) or promotionalVideo field (for direct URL)',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiBody({ type: PrepareVideoUploadDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Presigned URL generated successfully',
+    type: PrepareVideoUploadResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async prepareVideoUpload(
+    @UserDecorator() user: UserEntity | null,
+    @Body() prepareDto: PrepareVideoUploadDto,
+    @Token() token: string,
+  ): Promise<PrepareVideoUploadResponseDto> {
+    if (!token) {
+      throw new BadRequestException('JWT token is required');
+    }
+    const userId = user?.id || null;
+    return await this.recipeService.prepareVideoUpload(userId, prepareDto, token);
+  }
+
   @Post('mark-uploaded/:mediaId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -150,14 +183,19 @@ export class RecipeController {
       '**Safe two-phase upload workflow:**\n\n' +
       '1. Call POST /recipes/prepare-upload to get presigned URLs for images\n' +
       '2. Call POST /recipes/prepare-step-resources-upload to get presigned URLs for step resources\n' +
-      '3. Upload files directly to S3/MinIO using presigned URLs (PUT request)\n' +
-      '4. Call POST /recipes/mark-uploaded/:mediaId for each uploaded file\n' +
-      '5. Call this endpoint to create recipe with mediaIds (recipe is created but not finalized)\n' +
-      '6. Call POST /recipes/confirm-upload/:recipeId to finalize recipe with URLs\n\n' +
+      '3. (Optional) Call POST /recipes/prepare-video-upload to get presigned URL for promotional video\n' +
+      '4. Upload files directly to S3/MinIO using presigned URLs (PUT request)\n' +
+      '5. Call POST /recipes/mark-uploaded/:mediaId for each uploaded file\n' +
+      '6. Call this endpoint to create recipe with mediaIds (recipe is created but not finalized)\n' +
+      '7. Call POST /recipes/confirm-upload/:recipeId to finalize recipe with URLs\n\n' +
       '**Benefits:**\n' +
       '- Recipe is created first, files are linked via mediaId\n' +
       '- If upload fails, recipe can be deleted\n' +
-      '- Transactional safety',
+      '- Transactional safety\n\n' +
+      '**Products:**\n' +
+      '- You can provide `productIds` (array of product IDs from database)\n' +
+      '- Or `customProducts` (array of strings with arbitrary product names entered by user)\n' +
+      '- Or both. At least one must be provided.',
   })
   @ApiBearerAuth('JWT-auth')
   @ApiBody({ type: CreateRecipeWithMediaIdsDto })
@@ -230,7 +268,15 @@ export class RecipeController {
       '**For step resources (images/videos in steps):**\n' +
       '- Use direct URLs in `stepsConfig.steps[].resources[].source`\n' +
       '- Or call POST /recipes/prepare-step-resources-upload to get presigned URLs\n' +
-      '- Upload files and mark as uploaded, then use returned URLs in resources',
+      '- Upload files and mark as uploaded, then use returned URLs in resources\n\n' +
+      '**For promotional video:**\n' +
+      '- Use direct URL in `promotionalVideo` field\n' +
+      '- Or call POST /recipes/prepare-video-upload to get presigned URL\n' +
+      '- Upload file and mark as uploaded, then use returned URL in `promotionalVideo` field\n\n' +
+      '**Products:**\n' +
+      '- You can provide `productIds` (array of product IDs from database)\n' +
+      '- Or `customProducts` (array of strings with arbitrary product names entered by user)\n' +
+      '- Or both. At least one must be provided.',
   })
   @ApiBearerAuth('JWT-auth')
   @ApiBody({ type: CreateRecipeDto })
@@ -413,12 +459,10 @@ export class RecipeController {
     @Query('productIds') productIdsParam: string | undefined,
     @UserDecorator() user: UserEntity | null,
   ): Promise<RecipeResponseDto[]> {
-    // Проверяем, что передан хотя бы один параметр
     if ((!searchQuery || searchQuery.trim().length === 0) && !productIdsParam) {
       throw new BadRequestException('Either search query (q) or productIds parameter is required');
     }
 
-    // Парсим productIds если передан
     let productIds: number[] | undefined = undefined;
     if (productIdsParam) {
       productIds = productIdsParam

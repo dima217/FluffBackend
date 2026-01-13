@@ -95,6 +95,7 @@ services:
       LOKI_HOST: http://loki:3100
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      MEDIA_SERVICE_URL: http://host.docker.internal:3002
     depends_on:
       postgres:
         condition: service_healthy
