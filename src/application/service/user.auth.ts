@@ -306,6 +306,9 @@ export class UserAuthService implements IUserAuthService {
       gender: user.gender,
       height: user.height,
       weight: user.weight,
+      sportActivity: user.sportActivity,
+      cheatMealDay: user.cheatMealDay,
+      periodOfDays: user.periodOfDays,
       bio: '',
       photo: '',
     };

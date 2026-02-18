@@ -35,6 +35,15 @@ export class Profile {
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
   weight: number | null;
 
+  @Column('varchar', { length: 255, nullable: true })
+  sportActivity: string | null;
+
+  @Column('varchar', { length: 255, nullable: true })
+  cheatMealDay: string | null;
+
+  @Column('varchar', { length: 255, nullable: true })
+  periodOfDays: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

@@ -103,6 +103,21 @@ export class UserSignUpDto {
   @Min(20)
   @Max(500)
   weight: number;
+
+  @IsNotEmpty()
+  @IsString()
+  @Type(() => String)
+  sportActivity: string;
+  
+  @IsNotEmpty()
+  @IsString()
+  @Type(() => String)
+  cheatMealDay: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Type(() => String)
+  periodOfDays: string;
 }
 
 export class UserSignUpInitDto {

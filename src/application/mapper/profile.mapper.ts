@@ -7,6 +7,9 @@ export interface ProfileRegistrationData {
   gender: string;
   height: number;
   weight: number;
+  sportActivity?: string;
+  cheatMealDay?: string;
+  periodOfDays?: string;
   bio?: string;
   photo?: string;
 }
@@ -21,6 +24,9 @@ export class ProfileMapper {
       gender: (data as ProfileRegistrationData)?.gender || null,
       height: (data as ProfileRegistrationData)?.height || null,
       weight: (data as ProfileRegistrationData)?.weight || null,
+      sportActivity: (data as ProfileRegistrationData)?.sportActivity || null,
+      cheatMealDay: (data as ProfileRegistrationData)?.cheatMealDay || null,
+      periodOfDays: (data as ProfileRegistrationData)?.periodOfDays || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     } as Profile;
