@@ -12,6 +12,7 @@ export interface IUserAuthService {
   signUp(user: UserSignUpDto, auditContext?: AuditContext): Promise<JwtTokensDto>;
   signUpInit(user: UserSignUpInitDto, auditContext?: AuditContext): Promise<void>;
   signIn(user: UserLoginDto, auditContext?: AuditContext): Promise<JwtTokensDto>;
+  adminSignIn(user: UserLoginDto, auditContext?: AuditContext): Promise<JwtTokensDto>;
   signOut(userId: number, auditContext?: AuditContext): Promise<void>;
   newAccessToken(refreshToken: string): Promise<string>;
   recoveryInit(username: string): Promise<void>;

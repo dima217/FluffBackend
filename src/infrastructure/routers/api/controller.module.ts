@@ -6,6 +6,7 @@ import { ProductController } from "./product.controller";
 import { FavoriteController } from "./favorite.controller";
 import { TrackingController } from "./tracking.controller";
 import { MediaController } from "./media.controller";
+import { AdminController } from "./admin.controller";
 import { ApplicationModule } from "@application/application.module";
 
 @Module({
@@ -18,6 +19,7 @@ import { ApplicationModule } from "@application/application.module";
 		FavoriteController,
 		TrackingController,
 		MediaController,
+		AdminController,
 	],
 })
 export class ControllerModule {

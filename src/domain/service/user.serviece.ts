@@ -70,7 +70,10 @@ export class DomainUserService {
 	createJwtTokens(token: TokenEntity): JwtTokensDto {
 		const appConfig = this.configService.get<AppConfig>("app", { infer: true });
 		const accessToken = this.jwtService.sign(
-			{ sub: token.user.id },
+			{ 
+				sub: token.user.id,
+				isSuper: token.user.isSuper || false,
+			},
 			{
 				secret: appConfig?.jwt.secret,
 				expiresIn: appConfig?.jwt.accessExpiresIn ?? "15m",

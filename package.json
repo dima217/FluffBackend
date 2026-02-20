@@ -21,7 +21,10 @@
     "prepare": "husky",
     "swagger:fetch": "node scripts/fetch-swagger.js",
     "swagger:fetch:pretty": "node scripts/fetch-swagger.js --pretty",
-    "seed": "ts-node -r tsconfig-paths/register scripts/seed-database.ts"
+    "seed": "ts-node -r tsconfig-paths/register scripts/seed-database.ts",
+    "seed-audit-logs": "ts-node -r tsconfig-paths/register scripts/seed-audit-logs.ts",
+    "create-admin": "ts-node -r tsconfig-paths/register scripts/create-admin.ts",
+    "generate-test-data": "ts-node -r tsconfig-paths/register scripts/generate-test-data.ts"
   },
   "dependencies": {
     "@keyv/redis": "^5.1.4",
@@ -34,6 +37,7 @@
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.1",
     "@nestjs/swagger": "^11.2.1",
     "@nestjs/typeorm": "^11.0.0",
     "@react-email/components": "^1.0.0",

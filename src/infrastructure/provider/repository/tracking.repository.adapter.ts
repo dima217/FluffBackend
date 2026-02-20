@@ -42,6 +42,23 @@ export class TrackingRepositoryAdapter implements ITrackingRepository {
 		});
 	}
 
+	async findAllPaginated(
+		page: number,
+		limit: number,
+		userId?: number,
+	): Promise<{ data: Tracking[]; total: number }> {
+		const where = userId !== undefined ? { user: { id: userId } } : {};
+		const skip = (page - 1) * limit;
+		const [data, total] = await this.repository.findAndCount({
+			where,
+			skip,
+			take: limit,
+			relations: ['user', 'recipe'],
+			order: { created: 'DESC' },
+		});
+		return { data, total };
+	}
+
 	async findByDateRange(dateStart: Date, dateEnd: Date, userId: number): Promise<Tracking[]> {
 		return await this.repository
 			.createQueryBuilder('tracking')

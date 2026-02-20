@@ -40,5 +40,9 @@ export class AuditLogService {
 			console.error('Failed to create audit log:', error);
 		}
 	}
+
+	async getAuthActivityByDay(dateStart: Date, dateEnd: Date) {
+		return await this.auditLogRepository.getAuthActivityByDay(dateStart, dateEnd);
+	}
 }
 

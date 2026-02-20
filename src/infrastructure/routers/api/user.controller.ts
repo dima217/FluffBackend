@@ -114,6 +114,28 @@ export class UserController {
     return response;
   }
 
+  @Post('admin/sign-in')
+  @Public()
+  @ApiOperation({ 
+    summary: 'Admin login', 
+    description: 'Authenticate admin user (must have isSuper=true) and get JWT tokens' 
+  })
+  @ApiBody({ type: UserLoginDto })
+  @ApiResponse({ status: 200, description: 'Admin login successful', type: JwtTokensDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials or not an admin' })
+  @ApiResponse({ status: 403, description: 'User is not an admin' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async adminSignIn(
+    @Body() signInDto: UserLoginDto,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const auditContext = AuditContextMapper.fromRequest(request);
+    const jwtTokens = await this.userAuthService.adminSignIn(signInDto, auditContext);
+    UserUtils.setJwtTokensResponse(jwtTokens, response);
+    return response;
+  }
+
   @Post('sign-out')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

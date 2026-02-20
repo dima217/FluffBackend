@@ -95,6 +95,11 @@ export class TrackingService implements ITrackingService {
     return await this.trackingRepository.findAll(userId);
   }
 
+  async findAllPaginated(page: number, limit: number): Promise<{ data: Tracking[]; total: number }> {
+    this.logger.log(`Finding all tracking records, page=${page}, limit=${limit}`);
+    return await this.trackingRepository.findAllPaginated(page, limit);
+  }
+
   async getCurrentMonthCalendar(userId: number): Promise<CalendarTrackingResponseDto> {
     this.logger.log(`Getting current month calendar for user ${userId}`);
 

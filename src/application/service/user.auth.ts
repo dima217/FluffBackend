@@ -339,4 +339,113 @@ export class UserAuthService implements IUserAuthService {
 
     return this.userDomainService.createJwtTokens(token);
   }
+
+  async adminSignIn(user: UserLoginDto, auditContext?: AuditContext): Promise<JwtTokensDto> {
+    this.logger.log(`Admin sign in attempt for username: ${user.username}`);
+    let userFound: UserEntity;
+
+    try {
+      userFound = await this.userRepository.findOneByUsername(user.username);
+    } catch (error) {
+      if (auditContext) {
+        this.auditLogService.createLog(
+          AuditLogMapper.toCreateDto(AuditLogAction.SIGN_IN_FAILED, auditContext, {
+            user: null,
+            success: false,
+            errorMessage: 'User not found',
+            metadata: { username: user.username, isAdmin: true },
+          }),
+        );
+      }
+      throw error;
+    }
+
+    if (!userFound.isSuper) {
+      this.logger.warn(`Admin login attempt by non-admin user: ${user.username}`);
+      if (auditContext) {
+        this.auditLogService.createLog(
+          AuditLogMapper.toCreateDto(AuditLogAction.SIGN_IN_FAILED, auditContext, {
+            user: userFound,
+            success: false,
+            errorMessage: 'User is not an admin',
+            metadata: { username: user.username, isAdmin: true },
+          }),
+        );
+      }
+      throw new UnauthorizedException('Access denied. Admin privileges required.');
+    }
+
+    if (!this.userDomainService.verifyPassword(user.password, userFound.password)) {
+      this.logger.warn(`Invalid password for admin username: ${user.username}`);
+      if (auditContext) {
+        this.auditLogService.createLog(
+          AuditLogMapper.toCreateDto(AuditLogAction.SIGN_IN_FAILED, auditContext, {
+            user: userFound,
+            success: false,
+            errorMessage: 'Invalid password',
+            metadata: { username: user.username, isAdmin: true },
+          }),
+        );
+      }
+      throw new UnauthorizedException('Invalid username or password');
+    }
+
+    this.logger.log(`Successful admin sign in for user: ${user.username}`);
+
+    const [refreshToken, expiresAt] = this.userDomainService.createRefreshToken(userFound);
+    const tokenEntity = TokenMapper.toEntity(userFound, refreshToken, expiresAt);
+    const token = await this.tokenRepository.create(tokenEntity);
+
+    if (auditContext) {
+      this.auditLogService.createLog(
+        AuditLogMapper.toCreateDto(AuditLogAction.SIGN_IN_SUCCESS, auditContext, {
+          user: userFound,
+          success: true,
+          metadata: { username: user.username, isAdmin: true },
+        }),
+      );
+    }
+
+    return this.userDomainService.createJwtTokens(token);
+  }
+
+  // Admin methods
+  async findAllAdmin(page: number = 1, limit: number = 10): Promise<{ data: UserEntity[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await this.userRepository.findAll(skip, limit);
+    return { data: users, total };
+  }
+
+  async findOneAdmin(id: number): Promise<UserEntity> {
+    return await this.userRepository.findOne(id);
+  }
+
+  async updateUserStatusAdmin(id: number, isActive: boolean): Promise<UserEntity> {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.isActive = isActive;
+    return await this.userRepository.update(id, user);
+  }
+
+  async updateUserAdmin(id: number, userData: any): Promise<UserEntity> {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    
+    // Update user fields
+    Object.assign(user, userData);
+    
+    return await this.userRepository.update(id, user);
+  }
+
+  async deleteUserAdmin(id: number): Promise<void> {
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    await this.userRepository.delete(id);
+  }
 }
