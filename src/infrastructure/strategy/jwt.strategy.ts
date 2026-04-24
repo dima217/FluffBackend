@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload?: { sub?: number }) {
+  async validate(payload?: { sub?: number; isSuper?: boolean }) {
     if (!payload?.sub) {
       throw new UnauthorizedException('Invalid token');
     }
@@ -31,6 +31,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    return user;
+    // Сохраняем payload с isSuper для использования в guards
+    return {
+      ...user,
+      payload: {
+        sub: payload.sub,
+        isSuper: payload.isSuper || user.isSuper,
+      },
+    };
   }
 }

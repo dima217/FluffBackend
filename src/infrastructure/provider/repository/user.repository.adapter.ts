@@ -118,6 +118,15 @@ export class UserRepositoryAdapter implements IUserRepository {
     return user;
   }
 
+  async findAll(skip: number = 0, take: number = 10): Promise<[User[], number]> {
+    return await this.repository.findAndCount({
+      skip,
+      take,
+      order: { createdAt: 'DESC' },
+      relations: ['roles'],
+    });
+  }
+
   async update(id: number, user: Partial<User>): Promise<User> {
     try {
       const existingUser = await this.repository.findOne({ where: { id } });

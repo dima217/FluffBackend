@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { networkInterfaces } from 'os';
 import * as express from 'express';
 import { SwaggerJsonFilter } from '@infrastructure/filters/swagger-json.filter';
+import { ViewCacheService } from '@infrastructure/service/view-cache.service';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -18,6 +19,14 @@ async function bootstrap() {
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+  // Enable CORS
+  app.enableCors({
+    origin: ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:4000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002', 'http://127.0.0.1:4000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  });
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -72,5 +81,15 @@ async function bootstrap() {
     });
   }
   logger.log(`Swagger documentation available at: http://localhost:${port}/api`);
+
+  // Initialize admin stats view
+  try {
+    const viewCacheService = app.get(ViewCacheService);
+    if (viewCacheService) {
+      await viewCacheService.initializeView();
+    }
+  } catch (error) {
+    logger.warn('Failed to initialize admin stats view:', error);
+  }
 }
 void bootstrap();

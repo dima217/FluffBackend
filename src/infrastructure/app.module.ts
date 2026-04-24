@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { PassportModule } from '@nestjs/passport';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { databaseProviders } from './provider/datasourse';
 import { userRepository } from './provider/repository/user.provider';
@@ -9,6 +10,7 @@ import { profileRepository } from './provider/repository/profile.provider';
 import { codeProviders } from './provider/code.provider.registration';
 import { ApplicationModule } from '@application/application.module';
 import { ControllerModule } from '@infrastructure/routers/api';
+import { InfrastructureModule } from './infrastructure.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalStrategy } from './strategy/local.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -47,7 +49,9 @@ import { redisStore } from 'cache-manager-redis-store';
       },
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     PassportModule,
+    InfrastructureModule,
     ApplicationModule,
     ControllerModule,
   ],
