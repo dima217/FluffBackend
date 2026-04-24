@@ -388,6 +388,22 @@ export class RecipeController {
     return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
   }
 
+  @Get('ids')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get recipes by IDs',
+    description: 'Retrieve recipes by their IDs',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponse({ status: 200, description: 'Recipes retrieved successfully', type: [RecipeResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async findByIds(@UserDecorator() user: UserEntity, @Query('ids') ids: string): Promise<RecipeResponseDto[]> {
+    const idsArray = ids.split(',').map(id => parseInt(id, 10));
+    const recipes = await this.recipeService.findByIds(idsArray);
+    const favoriteIds = await this.recipeService.getFavoriteIds(user.id);
+    return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
+  }
+
   @Get('favorites')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

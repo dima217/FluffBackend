@@ -328,6 +328,20 @@ export class RecipeService implements IRecipeService {
     return await this.recipeRepository.findByUserId(userId);
   }
 
+  async findByIds(ids: number[]): Promise<Recipe[]> {
+    this.logger.log(`Finding recipes by IDs: ${ids.join(', ')}`);
+    const recipes = await this.recipeRepository.findByIds(ids);
+    
+    const recipesMap = new Map(recipes.map((r) => [r.id, r]));
+    const sortedRecipes = ids.reduce<Recipe[]>((acc, id) => {
+      const recipe = recipesMap.get(id);
+      if (recipe) acc.push(recipe);
+      return acc;
+    }, []);
+    
+    return sortedRecipes;
+  }
+
   async findFavoritesByUserId(userId: number): Promise<Recipe[]> {
     this.logger.log(`Finding favorite recipes for user ID: ${userId}`);
     const favorites = await this.favoriteRepository.findByUserId(userId);

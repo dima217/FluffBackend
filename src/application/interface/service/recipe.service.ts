@@ -41,6 +41,7 @@ export interface IRecipeService {
   markMediaAsUploaded(mediaId: string, token: string): Promise<void>;
   findOne(id: number): Promise<Recipe>;
   findAll(userId?: number | null, page?: number, limit?: number): Promise<{ data: Recipe[]; total: number }>;
+  findByIds(ids: number[]): Promise<Recipe[]>;
   findByUserId(userId: number): Promise<Recipe[]>;
   findFavoritesByUserId(userId: number): Promise<Recipe[]>;
   search(searchQuery: string, userId?: number | null, productIds?: number[]): Promise<Recipe[]>;
