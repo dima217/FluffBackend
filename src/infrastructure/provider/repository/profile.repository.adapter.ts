@@ -62,6 +62,12 @@ export class ProfileRepositoryAdapter implements IProfileRepository {
       birthDate: profile.birthDate,
       bio: profile.bio,
       photo: profile.photo,
+      gender: profile.gender,
+      height: profile.height,
+      weight: profile.weight,
+      sportActivity: profile.sportActivity,
+      cheatMealDay: profile.cheatMealDay,
+      periodOfDays: profile.periodOfDays,
     });
 
     return await this.repository.save(existingProfile);

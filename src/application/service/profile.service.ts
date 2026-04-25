@@ -45,6 +45,9 @@ export class ProfileService implements IProfileService {
 			gender: updateDto.gender,
 			height: updateDto.height,
 			weight: updateDto.weight,
+			sportActivity: updateDto.sportActivity,
+			cheatMealDay: updateDto.cheatMealDay,
+			periodOfDays: updateDto.periodOfDays,
 		});
 		await this.profileRepository.update(userId, profileUpdate);
 

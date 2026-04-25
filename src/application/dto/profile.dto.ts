@@ -76,6 +76,36 @@ export class UpdateProfileDto {
   @Min(20)
   @Max(500)
   weight?: number;
+  
+  @ApiPropertyOptional({
+    example: 'Running',
+    description: 'Sport activity',
+    enum: ['Running', 'Cycling', 'Swimming', 'Walking', 'Other'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(['Running', 'Cycling', 'Swimming', 'Walking', 'Other'])
+  sportActivity?: string;
+
+  @ApiPropertyOptional({
+    example: 'Cheat meal day',
+    description: 'Cheat meal day',
+    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+  cheatMealDay?: string;
+
+  @ApiPropertyOptional({
+    example: 'Period of days',
+    description: 'Period of days',
+    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+  periodOfDays?: string;
 }
 
 export class ProfileResponseDto {
