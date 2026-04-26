@@ -14,6 +14,7 @@ import {
 import { IsEqualToProperty } from '@application/decorator/is-equal-to-property.decorator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { Optional } from '@nestjs/common';
 
 export class UserSignUpDto {
   @ApiProperty({ example: 'user@example.com', description: 'User email address' })
@@ -118,6 +119,11 @@ export class UserSignUpDto {
   @IsString()
   @Type(() => String)
   periodOfDays: string;
+
+  @Optional()
+  @IsString()
+  @Type(() => String)
+  timeZone?: string;
 }
 
 export class UserSignUpInitDto {
@@ -151,6 +157,14 @@ export class UserLoginDto {
   @MinLength(10)
   @MaxLength(15)
   password: string;
+
+  @ApiProperty({
+    example: 'timeZone',
+    description: 'User timeZone',
+  })
+  @IsOptional()
+  @IsString()
+  timeZone?: string;
 }
 
 export class JwtTokensDto {

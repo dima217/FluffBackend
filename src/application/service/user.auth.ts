@@ -201,6 +201,10 @@ export class UserAuthService implements IUserAuthService {
       );
     }
 
+    if (user.timeZone) {
+      this.profileRepository.update(userFound.id, {timezone: user.timeZone})
+    }
+
     return this.userDomainService.createJwtTokens(token);
   }
   async signOut(userId: number, auditContext?: AuditContext): Promise<void> {
@@ -311,6 +315,7 @@ export class UserAuthService implements IUserAuthService {
       periodOfDays: user.periodOfDays,
       bio: '',
       photo: '',
+      timeZone: user.timeZone,
     };
     const profileEntity = ProfileMapper.toEntity(userSaved, profileData);
     await this.profileRepository.create(userSaved.id, profileEntity);

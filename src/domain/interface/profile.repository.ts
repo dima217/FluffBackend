@@ -4,5 +4,5 @@ export interface IProfileRepository {
   create(userId: number, profile: Profile): Promise<Profile>;
   findByUserId(userId: number): Promise<Profile>;
   findAllWithUsers(): Promise<Profile[]>;
-  update(userId: number, profile: Profile): Promise<Profile>;
+  update(userId: number, profile: Partial<Profile>): Promise<Profile>;
 }
