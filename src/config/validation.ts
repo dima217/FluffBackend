@@ -22,5 +22,6 @@ export const envValidationSchema = Joi.object({
 	CODE_LENGTH: Joi.number().min(4).max(6).optional(),
 	ENCRYPTION_SECRET: Joi.string().min(10).required(),
 	GOOGLE_CLIENT_ID: Joi.string().optional(),
+	GOOGLE_APPLICATION_CREDENTIALS: Joi.string().optional(),
 }).unknown(true);
 

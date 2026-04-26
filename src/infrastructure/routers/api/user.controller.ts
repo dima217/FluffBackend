@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCookieAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UserAuthService } from '@application/service/user.auth';
 import { ProfileService } from '@application/service/profile.service';
@@ -38,6 +40,9 @@ import { Public } from '@infrastructure/decorator/public.decorator';
 import type { Response, Request } from 'express';
 import type { User as UserEntity } from '@domain/entities/user.entity';
 import { Profile } from '@domain/entities/profile.entity';
+import { FcmTokenService } from '@application/service/fcm-token.service';
+import { MarkNotificationsReadDto, UpdateFcmTokenDto } from '@application/dto/token.dto';
+import { NotificationService } from '@application/service/notification.service';
 
 @ApiTags('User Authentication')
 @Controller('user')
@@ -47,6 +52,8 @@ export class UserController {
   constructor(
     private readonly userAuthService: UserAuthService,
     private readonly profileService: ProfileService,
+    private readonly fcmTokenService: FcmTokenService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Post('sign-up-init')
@@ -246,4 +253,58 @@ export class UserController {
   ): Promise<Profile> {
     return await this.profileService.updateProfile(user.id, updateDto);
   }
+
+  @Post('/fcm-token')
+  @ApiOperation({
+    summary: 'Register FCM device token',
+    description:
+      'Stores Firebase Cloud Messaging token for push notifications. Send null or empty to clear.',
+  })
+  @ApiBody({ type: UpdateFcmTokenDto })
+  @ApiResponse({ status: 200, description: 'Token saved' })
+  async registerFcmToken(
+    @User() user: UserEntity, 
+    @Body() body: UpdateFcmTokenDto) {
+    const raw = body.token;
+    const token =
+      raw === null || raw === undefined || (typeof raw === 'string' && raw.trim() === '')
+        ? null
+        : raw.trim();
+    await this.fcmTokenService.saveFcmToken(user.id, token);
+    return { success: true };
+  }
+
+  @Get('/notifications')
+  @ApiOperation({
+    summary: 'Get my notifications',
+    description: 'Returns notifications for authenticated user ordered by newest first.',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'offset', required: false, type: Number, example: 0 })
+  @ApiResponse({ status: 200, description: 'Notifications list' })
+  async getMyNotifications(
+    @User() user: UserEntity, 
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const parsedLimit = Number.isFinite(Number(limit)) ? Number(limit) : 20;
+    const parsedOffset = Number.isFinite(Number(offset)) ? Number(offset) : 0;
+    return this.notificationService.getUserNotifications(user.id, parsedLimit, parsedOffset);
+  }
+
+  @Post('/notifications/read')
+  @ApiOperation({
+    summary: 'Mark notifications as read',
+    description: 'Marks selected notifications as read for authenticated user.',
+  })
+  @ApiBody({ type: MarkNotificationsReadDto })
+  @ApiResponse({ status: 200, description: 'Notifications updated' })
+  async markNotificationsAsRead(
+    @User() user: UserEntity, 
+    @Body() body: MarkNotificationsReadDto,
+  ) {
+    await this.notificationService.markAsRead(user.id, body.ids);
+    return { success: true };
+  }
+
 }

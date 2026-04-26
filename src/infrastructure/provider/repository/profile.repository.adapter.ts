@@ -55,6 +55,12 @@ export class ProfileRepositoryAdapter implements IProfileRepository {
     return profile;
   }
 
+  async findAllWithUsers(): Promise<Profile[]> {
+    return this.repository.find({
+      relations: ['user'],
+    });
+  }
+
   async update(userId: number, profile: Profile): Promise<Profile> {
     const existingProfile = await this.findByUserId(userId);
 
@@ -68,6 +74,7 @@ export class ProfileRepositoryAdapter implements IProfileRepository {
       sportActivity: profile.sportActivity,
       cheatMealDay: profile.cheatMealDay,
       periodOfDays: profile.periodOfDays,
+      timezone: profile.timezone,
     });
 
     return await this.repository.save(existingProfile);

@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { User } from '@domain/entities/user.entity';
 import { IUserRepository } from '@domain/interface/user.repository';
 import {
@@ -76,6 +76,10 @@ export class UserRepositoryAdapter implements IUserRepository {
       }
       throw error;
     }
+  }
+
+  async findByIds(ids: number[]): Promise<User[]> {
+    return await this.repository.find({ where: { id: In(ids) } });
   }
 
   async findOne(id: number): Promise<User> {

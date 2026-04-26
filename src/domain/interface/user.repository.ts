@@ -2,6 +2,7 @@ import { User } from '@domain/entities/user.entity';
 
 export interface IUserRepository {
   create(user: User): Promise<User>;
+  findByIds(ids: number[]): Promise<User[]>;
   findOne(id: number): Promise<User>;
   findOneByUsername(username: string): Promise<User>;
   findAll(skip?: number, take?: number): Promise<[User[], number]>;

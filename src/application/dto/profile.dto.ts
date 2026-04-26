@@ -106,6 +106,14 @@ export class UpdateProfileDto {
   @IsString()
   @IsEnum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
   periodOfDays?: string;
+
+  @ApiPropertyOptional({
+    example: 'Europe/Moscow',
+    description: 'IANA timezone used for local reminder schedule',
+  })
+  @IsOptional()
+  @IsString()
+  timezone?: string;
 }
 
 export class ProfileResponseDto {

@@ -20,6 +20,7 @@ import { pinoLoggerProvider } from './provider/logger/pino-logger.provider';
 import { ViewCacheService } from './service/view-cache.service';
 import { ViewCacheCronService } from './service/view-cache-cron.service';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
+import { notificarionRepository } from './provider/repository/notification.provider';
 
 @Global()
 @Module({
@@ -33,6 +34,7 @@ import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 		...roleRepository,
 		...auditLogRepository,
 		...trackingRepository,
+		...notificarionRepository,
 		...productRepository,
 		...recipeTypeRepository,
 		...recipeRepository,
@@ -58,6 +60,7 @@ import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 		...codeRepository,
 		...roleRepository,
 		...auditLogRepository,
+		...notificarionRepository,
 		...trackingRepository,
 		...productRepository,
 		...recipeTypeRepository,

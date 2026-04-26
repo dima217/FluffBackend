@@ -13,6 +13,7 @@ import { Recipe } from '@domain/entities/recipe.entity';
 import { Review } from '@domain/entities/review.entity';
 import { Favorite } from '@domain/entities/favorite.entity';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
+import { Notification } from '@domain/entities';
 
 export const databaseProviders = [
   {
@@ -35,12 +36,13 @@ export const databaseProviders = [
           AuditLog,
           Tracking,
           Product,
+          Notification,
           RecipeType,
           Recipe,
           Review,
           Favorite,
         ],
-        synchronize: true,
+        synchronize: false,
         logging: appConfig?.nodeEnv === 'development',
       });
 

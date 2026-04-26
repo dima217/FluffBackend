@@ -16,6 +16,7 @@ export class UserMapper {
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			deletedAt: null,
+			fcmToken: null
 		} as User;
 	}
 
@@ -33,6 +34,7 @@ export class UserMapper {
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			deletedAt: null,
+			fcmToken: null
 		} as User;
 	}
 }

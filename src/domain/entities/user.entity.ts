@@ -59,4 +59,7 @@ export class User {
   updatedAt: Date;
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  @Column('text', { nullable: true })
+  fcmToken: string | null;
 }

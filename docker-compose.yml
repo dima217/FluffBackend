@@ -90,7 +90,9 @@ services:
       MAIL_FROM: ${MAIL_FROM:-app-mini@yandex.ru}
       MAIL_SECURE: ${MAIL_SECURE:-false}
       CODE_LENGTH: ${CODE_LENGTH:-5}
+      GOOGLE_CLIENT_ID: 1093938188069-4ktev2ehf5rbbdb07qq3uc5mvifal4lg.apps.googleusercontent.com
       ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-your-super-secret-encryption-key-min-10-chars}
+      GOOGLE_APPLICATION_CREDENTIALS: /app/secrets/fluff-527b4-firebase-adminsdk-fbsvc-8d51ef2ef0.json
       LOKI_HOST: http://loki:3100
       REDIS_HOST: redis
       REDIS_PORT: 6379

@@ -48,6 +48,7 @@ export class ProfileService implements IProfileService {
 			sportActivity: updateDto.sportActivity,
 			cheatMealDay: updateDto.cheatMealDay,
 			periodOfDays: updateDto.periodOfDays,
+			timezone: updateDto.timezone,
 		});
 		await this.profileRepository.update(userId, profileUpdate);
 

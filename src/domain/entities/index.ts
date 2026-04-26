@@ -10,3 +10,4 @@ export * from './recipe-type.entity';
 export * from './recipe.entity';
 export * from './review.entity';
 export * from './favorite.entity';
+export * from './notification.entity';

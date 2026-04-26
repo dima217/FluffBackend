@@ -20,6 +20,11 @@ import type { AppConfig } from '@config';
 import { FavoriteProcessManager } from './service/process/favorite-process.manager';
 import { RecipeFavoriteCountProcess } from './service/process/recipe-favorite-count.process';
 import { ProductFavoriteCountProcess } from './service/process/product-favorite-count.process';
+import { FcmTokenService } from './service/fcm-token.service';
+import { FcmService } from './service/fcm.service';
+import { NotificationService } from './service/notification.service';
+import { PushEventsService } from './service/push-event.service';
+import { TrackingReminderCronService } from './service/tracking-reminder-cron.service';
 
 @Module({
   imports: [
@@ -52,6 +57,11 @@ import { ProductFavoriteCountProcess } from './service/process/product-favorite-
     TrackingService,
     ReviewService,
     MediaService,
+    FcmTokenService,
+    FcmService,
+    PushEventsService,
+    NotificationService,
+    TrackingReminderCronService,
     RecipeFavoriteCountProcess,
     ProductFavoriteCountProcess,
     {
@@ -82,6 +92,10 @@ import { ProductFavoriteCountProcess } from './service/process/product-favorite-
     ReviewService,
     MediaService,
     FavoriteService,
+    FcmTokenService,
+    FcmService,
+    PushEventsService,
+    NotificationService,
   ],
 })
 export class ApplicationModule {}

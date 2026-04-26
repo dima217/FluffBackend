@@ -16,6 +16,7 @@ import {
 } from '@application/dto/tracking.dto';
 import { TrackingMapper } from '@application/mapper/tracking.mapper';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
+import { PushEventsService } from './push-event.service';
 
 @Injectable()
 export class TrackingService implements ITrackingService {
@@ -30,6 +31,7 @@ export class TrackingService implements ITrackingService {
     private readonly userRepository: IUserRepository,
     @Inject(REPOSITORY_CONSTANTS.RECIPE_REPOSITORY)
     private readonly recipeRepository: IRecipeRepository,
+    private readonly pushService: PushEventsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -57,6 +59,7 @@ export class TrackingService implements ITrackingService {
 
   async create(userId: number, createDto: CreateTrackingDto): Promise<Tracking> {
     this.logger.log(`Creating tracking for user ${userId}`);
+    this.pushService.notifyTracking(userId);
 
     // Валидация: либо recipeId, либо name+calories должны быть указаны
     if (!createDto.recipeId && (!createDto.name || !createDto.calories)) {

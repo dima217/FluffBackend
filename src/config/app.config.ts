@@ -32,6 +32,7 @@ export default registerAs('app', () => ({
   oauth: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+      creditionals: process.env.GOOGLE_APPLICATION_CREDENTIALS ?? '',
     },
   },
   redis: {

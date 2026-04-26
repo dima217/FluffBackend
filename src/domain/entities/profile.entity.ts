@@ -44,6 +44,9 @@ export class Profile {
   @Column('varchar', { length: 255, nullable: true })
   periodOfDays: string | null;
 
+  @Column('varchar', { length: 64, default: 'UTC' })
+  timezone: string;
+
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
