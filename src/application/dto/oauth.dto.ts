@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 export class OAuthDto {
@@ -16,6 +16,10 @@ export class OAuthDto {
 	@IsNotEmpty()
 	@IsEnum(OAuthDto.Type)
 	type: OAuthType;
+
+	@IsString()
+	@IsOptional()
+	timeZone?: string;
 }
 
 export type OAuthType = typeof OAuthDto.Type[keyof typeof OAuthDto.Type];

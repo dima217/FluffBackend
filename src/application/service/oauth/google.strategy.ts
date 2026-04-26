@@ -114,6 +114,7 @@ export class GoogleStrategy extends OAuthStrategy {
           );
         }
 
+        await this.profileRepository.update(userFound.id, {timezone: oauthData.timeZone})
         return tokens;
       } else {
         // User doesn't exist - register user using registration method
@@ -227,6 +228,7 @@ export class GoogleStrategy extends OAuthStrategy {
       const profileData = {
         photo: photo || '',
         birthDate: undefined, // Can be set if obtained from People API
+        timezone: oauthData.timeZone,
       };
       const profileEntity = ProfileMapper.toEntity(userSaved, profileData);
       await this.profileRepository.create(userSaved.id, profileEntity);
