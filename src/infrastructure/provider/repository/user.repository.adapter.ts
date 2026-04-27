@@ -179,4 +179,14 @@ export class UserRepositoryAdapter implements IUserRepository {
 
     return user;
   }
+
+  async clearTokenFromOtherUsers(userId: number, token: string): Promise<void> {
+    await this.repository
+      .createQueryBuilder()
+      .update()
+      .set({ fcmToken: null })
+      .where('fcmToken = :token', { token })
+      .andWhere('id != :userId', { userId })
+      .execute();
+  }
 }

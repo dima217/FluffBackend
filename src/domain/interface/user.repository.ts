@@ -8,6 +8,6 @@ export interface IUserRepository {
   findAll(skip?: number, take?: number): Promise<[User[], number]>;
   update(id: number, user: Partial<User>): Promise<User>;
   delete(id: number): Promise<void>;
-
   findEmailOrPhone(email?: string): Promise<User | null>;
+  clearTokenFromOtherUsers(userId: number, token: string): Promise<void>;
 }

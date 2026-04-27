@@ -15,6 +15,12 @@ export class FcmTokenService implements IFcmTokenService {
 
   /** Save or replace the device token; pass `null` or clear via {@link clearToken} to unregister pushes. */
   async saveFcmToken(userId: number, token: string | null): Promise<void> {
+    if (!token) {
+      await this.userRepository.update(userId, { fcmToken: null });
+      return;
+    }
+    await this.userRepository.clearTokenFromOtherUsers(userId, token);
+  
     await this.userRepository.update(userId, { fcmToken: token });
   }
 
