@@ -9,6 +9,7 @@ import {
   Max,
   ValidateNested,
   IsObject,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -217,6 +218,14 @@ export class CreateRecipeWithMediaIdsDto {
   @ValidateNested()
   @Type(() => RecipeStepsConfigWithMediaIdsDto)
   stepsConfig: RecipeStepsConfigWithMediaIdsDto;
+
+  @ApiProperty({ example: true, description: 'Make recipe public for searching' })
+  @IsBoolean()
+  makePublic: boolean;
+
+  @ApiProperty({ example: false, description: 'Request to submit recipe for others users recommendations' })
+  @IsBoolean()
+  submitToSystem: boolean;
 }
 
 export class CreateRecipeDto {
@@ -294,6 +303,14 @@ export class CreateRecipeDto {
   @ValidateNested()
   @Type(() => RecipeStepsConfigDto)
   stepsConfig: RecipeStepsConfigDto;
+
+  @ApiProperty({ example: true, description: 'Make recipe public for searching' })
+  @IsBoolean()
+  makePublic: boolean;
+
+  @ApiProperty({ example: false, description: 'Request to submit recipe for others users recommendations' })
+  @IsBoolean()
+  submitToSystem: boolean;
 }
 
 export class PrepareUploadDto {

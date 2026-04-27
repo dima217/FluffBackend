@@ -106,4 +106,10 @@ export class Recipe {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({type: 'boolean', nullable: false})
+	makePublic: boolean;
+
+	@Column({type: 'boolean', nullable: false})
+	submitToSystem: boolean;
 }

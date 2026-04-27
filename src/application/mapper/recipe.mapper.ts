@@ -8,7 +8,6 @@ import {
 import type { User } from '@domain/entities/user.entity';
 import type { RecipeType } from '@domain/entities/recipe-type.entity';
 import type { Product } from '@domain/entities/product.entity';
-import { RelatedEntityType } from '@domain/enums/related-entity-type.enum';
 
 export class RecipeMapper {
   static toEntity(
@@ -32,6 +31,8 @@ export class RecipeMapper {
       calories: createDto.calories,
       cookAt: createDto.cookAt,
       stepsConfig: createDto.stepsConfig,
+      makePublic: createDto.makePublic,
+      submitToSystem: createDto.submitToSystem,
     } as Recipe;
   }
 
@@ -85,6 +86,8 @@ export class RecipeMapper {
       calories: createDto.calories,
       cookAt: createDto.cookAt,
       stepsConfig: stepsConfigWithPlaceholders,
+      makePublic: createDto.makePublic,
+      submitToSystem: createDto.submitToSystem,
     } as Recipe;
   }
 
