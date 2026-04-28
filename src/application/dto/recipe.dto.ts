@@ -582,7 +582,7 @@ export class UpdateRecipeDto {
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
   @Type(() => Boolean)
-  isFluff?: boolean;
+  isFluff?: boolean | null;
 
   @ApiPropertyOptional({ example: 500, description: 'Calories count' })
   @IsOptional()
@@ -656,7 +656,7 @@ export class RecipeResponseDto {
   customProducts: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
-  isFluff: boolean;
+  isFluff: boolean | null;
 
   @ApiProperty({ example: 500, description: 'Calories count' })
   calories: number;

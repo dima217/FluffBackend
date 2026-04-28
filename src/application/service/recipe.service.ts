@@ -319,10 +319,28 @@ export class RecipeService implements IRecipeService {
     this.logger.log(
       `Finding all recipes${page && limit ? ` (page: ${page}, limit: ${limit})` : ''}`,
     );
-    const options = page && limit ? { page, limit } : undefined;
-    return await this.recipeRepository.findAll(options);
+    if (userId) {
+      const isSuperUser = (await this.userRepository.findOne(userId)).isSuper;
+      const options = page && limit ? { page, limit } : undefined;
+      return await this.recipeRepository.findAll(isSuperUser, options);
+    }
+    else {
+      return {data: [], total: 0};
+    }
   }
 
+  async findRequests(
+    userId?: number | null,
+    page?: number,
+    limit?: number,
+  ): Promise<{ data: Recipe[]; total: number }> {
+    this.logger.log(
+      `Finding requests recipes${page && limit ? ` (page: ${page}, limit: ${limit})` : ''}`,
+    );
+    const options = page && limit ? { page, limit } : undefined;
+    return await this.recipeRepository.findByRequests(options); 
+  }
+  
   async findByUserId(userId: number): Promise<Recipe[]> {
     this.logger.log(`Finding recipes for user ID: ${userId}`);
     return await this.recipeRepository.findByUserId(userId);

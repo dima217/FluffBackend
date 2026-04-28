@@ -89,8 +89,8 @@ export class Recipe {
   @Column('jsonb', { nullable: true })
   customProducts: string[] | null;
 
-	@Column('boolean', { default: false })
-  isFluff: boolean;
+	@Column('boolean', { default: false, nullable: true })
+  isFluff: boolean | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
   calories: number;

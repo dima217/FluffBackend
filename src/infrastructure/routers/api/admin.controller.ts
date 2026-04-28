@@ -21,7 +21,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { User as UserDecorator } from '@infrastructure/decorator/user.decorator';
+import { User, User as UserDecorator } from '@infrastructure/decorator/user.decorator';
 import type { User as UserEntity } from '@domain/entities/user.entity';
 import { ViewCacheService } from '@infrastructure/service/view-cache.service';
 import { RecipeService } from '@application/service/recipe.service';
@@ -172,8 +172,22 @@ export class AdminController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Recipes retrieved successfully' })
-  async getRecipes(@Query() pagination: PaginationQueryDto) {
-    return await this.recipeService.findAll(null, pagination.page || 1, pagination.limit || 10);
+  async getRecipes(@Query() pagination: PaginationQueryDto, @UserDecorator() user: UserEntity) {
+    return await this.recipeService.findAll(user.id, pagination.page || 1, pagination.limit || 10);
+  }
+
+  @Get('recipes/requests')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get all recipes (admin)',
+    description: 'Get paginated list of all recipes',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Recipes retrieved successfully' })
+  async getRequests(@Query() pagination: PaginationQueryDto,
+) {
+    return await this.recipeService.findRequests(null, pagination.page || 1, pagination.limit || 10);
   }
 
   @Get('recipes/:id')

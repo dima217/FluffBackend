@@ -29,7 +29,31 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
     return recipe;
   }
 
-  async findAll(options?: { page: number; limit: number }): Promise<{ data: Recipe[]; total: number }> {
+  async findAll(isSuperUser: boolean, options?: { page: number; limit: number }): Promise<{ data: Recipe[]; total: number }> {
+    const whereCondition = isSuperUser ? {} : { makePublic: true };
+
+    if (!options) {
+      const data = await this.repository.find({
+        where: whereCondition,
+        relations: ['user', 'type', 'products'],
+      });
+      return { data, total: data.length };
+    }
+
+    const { page, limit } = options;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.repository.findAndCount({
+      where: whereCondition,
+      relations: ['user', 'type', 'products'],
+      skip,
+      take: limit,
+    });
+
+    return { data, total };
+  }
+
+  async findByRequests(options?: { page: number; limit: number }): Promise<{ data: Recipe[]; total: number }> {
     if (!options) {
       const data = await this.repository.find({
         where: { makePublic: true },
@@ -42,12 +66,11 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
     const skip = (page - 1) * limit;
 
     const [data, total] = await this.repository.findAndCount({
-      where: { makePublic: true }, 
+      where: { submitToSystem: false, isFluff: false },
       relations: ['user', 'type', 'products'],
       skip,
       take: limit,
-    });
-
+    })
     return { data, total };
   }
 
