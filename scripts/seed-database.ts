@@ -725,7 +725,7 @@ async function seedDatabase() {
           image: productImage,
           imageMediaIds: null,
           countFavorites: 0,
-          fluffAt: null,
+          isFluff: false,
         });
         product = await productRepository.save(product);
         createdProducts++;
@@ -766,7 +766,7 @@ async function seedDatabase() {
           image: productImage,
           imageMediaIds: null,
           countFavorites: 0,
-          fluffAt: null,
+          isFluff: false,
         });
         product = await productRepository.save(product);
         createdProducts++;
@@ -945,7 +945,7 @@ async function seedDatabase() {
         promotionalVideoMediaId: null,
         description: recipeData.description,
         products: recipeProducts,
-        fluffAt: null,
+        isFluff: false,
         calories: recipeData.calories,
         cookAt: recipeData.cookAt,
         stepsConfig,

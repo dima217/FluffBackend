@@ -12,6 +12,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProductResponseDto } from './product.dto';
 
 export class RecipeImageDto {
   @ApiProperty({
@@ -196,8 +197,8 @@ export class CreateRecipeWithMediaIdsDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 
   @ApiProperty({ example: 500, description: 'Calories count' })
   @IsNumber()
@@ -225,7 +226,8 @@ export class CreateRecipeWithMediaIdsDto {
 
   @ApiProperty({ example: false, description: 'Request to submit recipe for others users recommendations' })
   @IsBoolean()
-  submitToSystem: boolean;
+  @IsOptional()
+  submitToSystem: false | null;
 }
 
 export class CreateRecipeDto {
@@ -281,8 +283,8 @@ export class CreateRecipeDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 
   @ApiProperty({ example: 500, description: 'Calories count' })
   @IsNumber()
@@ -579,8 +581,8 @@ export class UpdateRecipeDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 
   @ApiPropertyOptional({ example: 500, description: 'Calories count' })
   @IsOptional()
@@ -644,7 +646,7 @@ export class RecipeResponseDto {
   description: string | null;
 
   @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
-  products: number[];
+  products: ProductResponseDto[];
 
   @ApiPropertyOptional({
     type: [String],
@@ -654,7 +656,7 @@ export class RecipeResponseDto {
   customProducts: string[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
-  fluffAt: Date | null;
+  isFluff: boolean;
 
   @ApiProperty({ example: 500, description: 'Calories count' })
   calories: number;

@@ -506,8 +506,8 @@ export class RecipeService implements IRecipeService {
         updateDto.customProducts.length > 0 ? updateDto.customProducts : null;
     }
 
-    if (updateDto.fluffAt !== undefined) {
-      updateData.fluffAt = updateDto.fluffAt || null;
+    if (updateDto.isFluff !== undefined) {
+      updateData.isFluff = updateDto.isFluff;
     }
 
     if (updateDto.calories !== undefined) {

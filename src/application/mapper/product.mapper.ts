@@ -14,7 +14,7 @@ export class ProductMapper {
 			massa: createDto.massa,
 			image: createDto.image || null,
 			imageMediaIds: null,
-			fluffAt: createDto.fluffAt || null,
+			isFluff: createDto.isFluff,
 			countFavorites: 0,
 		} as Product;
 	}
@@ -32,7 +32,7 @@ export class ProductMapper {
 				coverMediaId: createDto.imageMediaIds.coverMediaId,
 				previewMediaId: createDto.imageMediaIds.previewMediaId,
 			} as ProductImageMediaIds,
-			fluffAt: createDto.fluffAt || null,
+			isFluff: createDto.isFluff,
 			countFavorites: 0,
 		} as Product;
 	}
@@ -46,7 +46,7 @@ export class ProductMapper {
 			image: product.image,
 			countFavorites: product.countFavorites || 0,
 			favorite: favoriteIds ? favoriteIds.has(product.id) : false,
-			fluffAt: product.fluffAt,
+			isFluff: product.isFluff,
 			createdAt: product.createdAt,
 		};
 	}

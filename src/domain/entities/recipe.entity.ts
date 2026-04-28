@@ -89,8 +89,8 @@ export class Recipe {
   @Column('jsonb', { nullable: true })
   customProducts: string[] | null;
 
-  @Column('timestamp', { nullable: true })
-  fluffAt: Date | null;
+	@Column('boolean', { default: false })
+  isFluff: boolean;
 
   @Column('decimal', { precision: 10, scale: 2 })
   calories: number;
@@ -110,6 +110,6 @@ export class Recipe {
   @Column({type: 'boolean', nullable: false})
 	makePublic: boolean;
 
-	@Column({type: 'boolean', nullable: false})
+	@Column({type: 'boolean', nullable: true})
 	submitToSystem: boolean;
 }

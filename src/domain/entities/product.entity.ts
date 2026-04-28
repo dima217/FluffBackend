@@ -39,8 +39,8 @@ export class Product {
 	@Min(0)
 	countFavorites: number;
 
-	@Column({ type: 'timestamp', nullable: true })
-	fluffAt: Date | null;
+	@Column('boolean', { default: false })
+	isFluff: boolean;
 
 	@CreateDateColumn()
 	createdAt: Date;

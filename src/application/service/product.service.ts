@@ -260,8 +260,8 @@ export class ProductService implements IProductService {
       updateData.image = updateDto.image;
     }
 
-    if (updateDto.fluffAt !== undefined) {
-      updateData.fluffAt = updateDto.fluffAt;
+    if (updateDto.isFluff !== undefined) {
+      updateData.isFluff = updateDto.isFluff;
     }
 
     return await this.productRepository.update(id, updateData);

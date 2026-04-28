@@ -8,6 +8,7 @@ import {
 import type { User } from '@domain/entities/user.entity';
 import type { RecipeType } from '@domain/entities/recipe-type.entity';
 import type { Product } from '@domain/entities/product.entity';
+import { ProductResponseDto } from '@application/dto';
 
 export class RecipeMapper {
   static toEntity(
@@ -27,7 +28,7 @@ export class RecipeMapper {
       description: createDto.description || null,
       products,
       customProducts: createDto.customProducts && createDto.customProducts.length > 0 ? createDto.customProducts : null,
-      fluffAt: createDto.fluffAt || null,
+      isFluff: createDto.isFluff || null,
       calories: createDto.calories,
       cookAt: createDto.cookAt,
       stepsConfig: createDto.stepsConfig,
@@ -82,7 +83,7 @@ export class RecipeMapper {
       description: createDto.description || null,
       products,
       customProducts: createDto.customProducts && createDto.customProducts.length > 0 ? createDto.customProducts : null,
-      fluffAt: createDto.fluffAt || null,
+      isFluff: createDto.isFluff,
       calories: createDto.calories,
       cookAt: createDto.cookAt,
       stepsConfig: stepsConfigWithPlaceholders,
@@ -111,9 +112,9 @@ export class RecipeMapper {
       image: recipe.image,
       promotionalVideo: recipe.promotionalVideo,
       description: recipe.description,
-      products: recipe.products?.map((p) => p.id) || [],
+      products: recipe.products?.map((p) => p as unknown as ProductResponseDto) || [],
       customProducts: recipe.customProducts || [],
-      fluffAt: recipe.fluffAt,
+      isFluff: recipe.isFluff,
       calories: Number(recipe.calories),
       cookAt: recipe.cookAt,
       stepsConfig: recipe.stepsConfig,

@@ -72,8 +72,8 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 }
 
 export class CreateProductWithMediaIdsDto {
@@ -104,8 +104,8 @@ export class CreateProductWithMediaIdsDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 }
 
 export class ConfirmProductUploadDto {
@@ -156,8 +156,8 @@ export class UpdateProductDto {
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
-  @Type(() => Date)
-  fluffAt?: Date | null;
+  @Type(() => Boolean)
+  isFluff?: boolean;
 }
 
 export class ProductResponseDto {
@@ -183,7 +183,7 @@ export class ProductResponseDto {
   favorite: boolean;
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
-  fluffAt: Date | null;
+  isFluff: Boolean;
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Creation date' })
   createdAt: Date;
