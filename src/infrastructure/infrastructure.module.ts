@@ -21,6 +21,7 @@ import { ViewCacheService } from './service/view-cache.service';
 import { ViewCacheCronService } from './service/view-cache-cron.service';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 import { notificarionRepository } from './provider/repository/notification.provider';
+import { supportRepository } from './provider/repository/support.provider';
 
 @Global()
 @Module({
@@ -40,6 +41,7 @@ import { notificarionRepository } from './provider/repository/notification.provi
 		...recipeRepository,
 		...reviewRepository,
 		...favoriteRepository,
+		...supportRepository,
 		...codeProviders,
 		DomainCodeService,
 		RoleInitService,
@@ -64,6 +66,7 @@ import { notificarionRepository } from './provider/repository/notification.provi
 		...trackingRepository,
 		...productRepository,
 		...recipeTypeRepository,
+		...supportRepository,
 		...recipeRepository,
 		...reviewRepository,
 		...favoriteRepository,

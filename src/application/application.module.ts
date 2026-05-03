@@ -25,6 +25,8 @@ import { FcmService } from './service/fcm.service';
 import { NotificationService } from './service/notification.service';
 import { PushEventsService } from './service/push-event.service';
 import { TrackingReminderCronService } from './service/tracking-reminder-cron.service';
+import { SupportService } from './service/support.service';
+import { AppWebSocketGateway } from './gateway/support.gatewat';
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { TrackingReminderCronService } from './service/tracking-reminder-cron.se
     TrackingReminderCronService,
     RecipeFavoriteCountProcess,
     ProductFavoriteCountProcess,
+    SupportService,
+    AppWebSocketGateway,
     {
       provide: FavoriteProcessManager,
       useFactory: (
@@ -96,6 +100,8 @@ import { TrackingReminderCronService } from './service/tracking-reminder-cron.se
     FcmService,
     PushEventsService,
     NotificationService,
+    SupportService,
+    AppWebSocketGateway,
   ],
 })
 export class ApplicationModule {}

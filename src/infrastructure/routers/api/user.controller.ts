@@ -306,5 +306,4 @@ export class UserController {
     await this.notificationService.markAsRead(user.id, body.ids);
     return { success: true };
   }
-
 }

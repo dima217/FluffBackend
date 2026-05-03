@@ -11,6 +11,7 @@ import {
   HttpStatus,
   ParseIntPipe,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,7 +22,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { User, User as UserDecorator } from '@infrastructure/decorator/user.decorator';
+import { User as UserDecorator } from '@infrastructure/decorator/user.decorator';
 import type { User as UserEntity } from '@domain/entities/user.entity';
 import { ViewCacheService } from '@infrastructure/service/view-cache.service';
 import { RecipeService } from '@application/service/recipe.service';
@@ -30,12 +31,14 @@ import { TrackingService } from '@application/service/tracking.service';
 import { ReviewService } from '@application/service/review.service';
 import { AuditLogService } from '@application/service/audit-log.service';
 import { UserAuthService } from '@application/service/user.auth';
-import { PaginationQueryDto, PaginatedResponseDto } from '@application/dto/pagination.dto';
+import { PaginationQueryDto } from '@application/dto/pagination.dto';
 import { CreateRecipeDto, RecipeResponseDto, UpdateRecipeDto } from '@application/dto/recipe.dto';
 import { CreateProductDto, ProductResponseDto, UpdateProductDto } from '@application/dto/product.dto';
-import { TrackingResponseDto } from '@application/dto/tracking.dto';
 import { IsSuperGuard } from '@infrastructure/guards/is-super.guard';
 import { JwtAuthGuard } from '@infrastructure/guards/jwt-auth.guard';
+import { SupportTicketQueryDto, SupportTicketResponseDto, ReplyToTicketDto, UpdateTicketStatusDto } from '@application/dto/support.dto';
+import { SupportTicketStatus } from '@domain/entities/support-ticket.entity';
+import { SupportService } from '@application/service/support.service';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -50,6 +53,7 @@ export class AdminController {
     private readonly reviewService: ReviewService,
     private readonly auditLogService: AuditLogService,
     private readonly userAuthService: UserAuthService,
+    private readonly supportService: SupportService,
   ) {}
 
   @Get('auth-activity')
@@ -329,5 +333,217 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Tracking records retrieved successfully' })
   async getTracking(@Query() pagination: PaginationQueryDto) {
     return await this.trackingService.findAllPaginated(pagination.page || 1, pagination.limit || 10);
+  }
+
+  @Get('/tickets')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get all tickets (Admin only)',
+    description:
+      'Retrieves all support tickets in the system. Supports pagination, filtering by status, and sorting. Only accessible by administrators.',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Number of tickets per page (default: 20, max: 100)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: Number,
+    required: false,
+    description: 'Number of tickets to skip (default: 0)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'status',
+    enum: SupportTicketStatus,
+    required: false,
+    description: 'Filter by ticket status',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    enum: ['createdAt', 'updatedAt', 'status'],
+    required: false,
+    description: 'Field to sort by (default: createdAt)',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    enum: ['asc', 'desc'],
+    required: false,
+    description: 'Sort order (default: desc)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tickets retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        tickets: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/SupportTicketResponseDto' },
+        },
+        total: { type: 'number', example: 50 },
+        limit: { type: 'number', example: 20 },
+        offset: { type: 'number', example: 0 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin role required',
+  })
+  async findAllAdmin(@Query() query: SupportTicketQueryDto) {
+    return await this.supportService.findAllAdmin(query);
+  }
+
+  @Get('/tickets/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get a single ticket by ID (Admin only)',
+    description:
+      'Retrieves detailed information about a specific support ticket. Only accessible by administrators.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Ticket ID',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ticket retrieved successfully',
+    type: SupportTicketResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin role required',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+  })
+  async findOneAdmin(@Param('id') id: string): Promise<SupportTicketResponseDto> {
+    return await this.supportService.findOneAdmin(parseInt(id, 10));
+  }
+
+  @Patch('/tickets/:id/reply')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Reply to a ticket (Admin only)',
+    description:
+      'Allows administrators to reply to a support ticket. The ticket status will automatically change to "in_progress" if it was "open".',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Ticket ID',
+    example: 1,
+  })
+  @ApiBody({
+    type: ReplyToTicketDto,
+    examples: {
+      example1: {
+        summary: 'Standard reply',
+        value: {
+          response:
+            'Спасибо за обращение. Мы проверили ваш заказ и связались с курьером. Заказ будет доставлен сегодня до 18:00.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Reply sent successfully',
+    type: SupportTicketResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Cannot reply to closed ticket or validation error',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin role required',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+  })
+  async replyToTicket(
+    @Param('id') id: string,
+    @Body() replyDto: ReplyToTicketDto,
+  ): Promise<SupportTicketResponseDto> {
+    return await this.supportService.replyToTicket(parseInt(id, 10), replyDto);
+  }
+
+  @Patch('/tickets/:id/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Update ticket status (Admin only)',
+    description:
+      'Allows administrators to change the status of a support ticket (open, in_progress, resolved, closed).',
+  })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Ticket ID',
+    example: 1,
+  })
+  @ApiBody({
+    type: UpdateTicketStatusDto,
+    examples: {
+      example1: {
+        summary: 'Mark as resolved',
+        value: {
+          status: 'resolved',
+        },
+      },
+      example2: {
+        summary: 'Close ticket',
+        value: {
+          status: 'closed',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Status updated successfully',
+    type: SupportTicketResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Validation error',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing JWT token',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin role required',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+  })
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateTicketStatusDto,
+  ): Promise<SupportTicketResponseDto> {
+    return await this.supportService.updateStatus(parseInt(id, 10), updateDto);
   }
 }

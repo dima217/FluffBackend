@@ -14,6 +14,7 @@ import { Review } from '@domain/entities/review.entity';
 import { Favorite } from '@domain/entities/favorite.entity';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 import { Notification } from '@domain/entities';
+import { SupportTicket } from '@domain/entities/support-ticket.entity';
 
 export const databaseProviders = [
   {
@@ -35,6 +36,7 @@ export const databaseProviders = [
           Role,
           AuditLog,
           Tracking,
+          SupportTicket,
           Product,
           Notification,
           RecipeType,

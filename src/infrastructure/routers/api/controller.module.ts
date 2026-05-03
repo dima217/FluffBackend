@@ -8,6 +8,7 @@ import { TrackingController } from "./tracking.controller";
 import { MediaController } from "./media.controller";
 import { AdminController } from "./admin.controller";
 import { ApplicationModule } from "@application/application.module";
+import { SupportController } from "./support.controller";
 
 @Module({
 	imports: [ApplicationModule],
@@ -17,6 +18,7 @@ import { ApplicationModule } from "@application/application.module";
 		RecipeController,
 		ProductController,
 		FavoriteController,
+		SupportController,
 		TrackingController,
 		MediaController,
 		AdminController,
