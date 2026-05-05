@@ -153,7 +153,10 @@ export class RecipeService implements IRecipeService {
     // Update promotionalVideo if mediaId was used
     let promotionalVideoUrl: string | null = recipe.promotionalVideo;
     if (recipe.promotionalVideoMediaId) {
-      const videoUrl = mediaUrlMap.get(recipe.promotionalVideoMediaId);
+      const videoUrl = await this.mediaService.getDownloadUrl(
+        recipe.promotionalVideoMediaId,
+        token,
+      );
       if (!videoUrl) {
         throw new BadRequestException('Promotional video URL not found');
       }
@@ -323,9 +326,8 @@ export class RecipeService implements IRecipeService {
       const isSuperUser = (await this.userRepository.findOne(userId)).isSuper;
       const options = page && limit ? { page, limit } : undefined;
       return await this.recipeRepository.findAll(isSuperUser, options);
-    }
-    else {
-      return {data: [], total: 0};
+    } else {
+      return { data: [], total: 0 };
     }
   }
 
@@ -338,9 +340,9 @@ export class RecipeService implements IRecipeService {
       `Finding requests recipes${page && limit ? ` (page: ${page}, limit: ${limit})` : ''}`,
     );
     const options = page && limit ? { page, limit } : undefined;
-    return await this.recipeRepository.findByRequests(options); 
+    return await this.recipeRepository.findByRequests(options);
   }
-  
+
   async findByUserId(userId: number): Promise<Recipe[]> {
     this.logger.log(`Finding recipes for user ID: ${userId}`);
     return await this.recipeRepository.findByUserId(userId);
@@ -349,14 +351,14 @@ export class RecipeService implements IRecipeService {
   async findByIds(ids: number[]): Promise<Recipe[]> {
     this.logger.log(`Finding recipes by IDs: ${ids.join(', ')}`);
     const recipes = await this.recipeRepository.findByIds(ids);
-    
+
     const recipesMap = new Map(recipes.map((r) => [r.id, r]));
     const sortedRecipes = ids.reduce<Recipe[]>((acc, id) => {
       const recipe = recipesMap.get(id);
       if (recipe) acc.push(recipe);
       return acc;
     }, []);
-    
+
     return sortedRecipes;
   }
 

@@ -174,4 +174,28 @@ export class MediaService implements IMediaService {
       throw new HttpException('Failed to connect to media service', HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
+
+  async getDownloadUrl(mediaId: string, token: string): Promise<string> {
+    try {
+      const response = await this.httpClient.get<{ url: string }>('/media/download-url', {
+        params: { url: mediaId },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data.url;
+    } catch (error: any) {
+      this.logger.error(`Failed to get download URL: ${error.message}`, error.stack);
+
+      if (error.response) {
+        throw new HttpException(
+          error.response.data?.message || 'Failed to get download URL',
+          error.response.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      throw new HttpException('Failed to connect to media service', HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
 }
