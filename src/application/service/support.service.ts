@@ -23,17 +23,33 @@ export interface SupportTicketsResponse {
   offset: number;
 }
 
-export function sortTickets(tickets: SupportTicket[], sortBy: SupportTicketSortBy, sortOrder: SupportTicketSortOrder) {
+export function sortTickets(
+  tickets: SupportTicket[],
+  sortBy: SupportTicketSortBy,
+  sortOrder: SupportTicketSortOrder,
+) {
   const orderDirection = sortOrder.toUpperCase() as 'ASC' | 'DESC';
   switch (sortBy) {
     case SupportTicketSortBy.UPDATED_AT:
-      tickets.sort((a, b) => orderDirection === 'ASC' ? a.updatedAt.getTime() - b.updatedAt.getTime() : b.updatedAt.getTime() - a.updatedAt.getTime());
+      tickets.sort((a, b) =>
+        orderDirection === 'ASC'
+          ? a.updatedAt.getTime() - b.updatedAt.getTime()
+          : b.updatedAt.getTime() - a.updatedAt.getTime(),
+      );
       break;
     case SupportTicketSortBy.STATUS:
-      tickets.sort((a, b) => orderDirection === 'ASC' ? a.status.localeCompare(b.status) : b.status.localeCompare(a.status));
+      tickets.sort((a, b) =>
+        orderDirection === 'ASC'
+          ? a.status.localeCompare(b.status)
+          : b.status.localeCompare(a.status),
+      );
       break;
     case SupportTicketSortBy.CREATED_AT:
-      tickets.sort((a, b) => orderDirection === 'ASC' ? a.createdAt.getTime() - b.createdAt.getTime() : b.createdAt.getTime() - a.createdAt.getTime());
+      tickets.sort((a, b) =>
+        orderDirection === 'ASC'
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : b.createdAt.getTime() - a.createdAt.getTime(),
+      );
       break;
   }
   return tickets;
@@ -52,7 +68,7 @@ export class SupportService implements ISupportService {
     userId: number,
     createDto: CreateSupportTicketDto,
     token: string,
-  ): Promise<{ ticket: SupportTicketResponseDto, media: CreateMediaResponseDto | null}> {
+  ): Promise<{ ticket: SupportTicketResponseDto; media: CreateMediaResponseDto | null }> {
     const newTicket = {
       userId,
       subject: createDto.subject,
@@ -74,9 +90,12 @@ export class SupportService implements ISupportService {
         },
         token,
       );
-    }  
+    }
 
-    const savedTicket = await this.supportTicketRepository.create(newTicket);
+    const savedTicket = await this.supportTicketRepository.create({
+      ...newTicket,
+      screenshot: supportMedia?.url,
+    });
 
     this.webSocketGateway.emitSupportTicketCreated({
       ticketId: savedTicket.id,
@@ -86,7 +105,7 @@ export class SupportService implements ISupportService {
       createdAt: savedTicket.createdAt,
     });
 
-    return {ticket: this.transformTicket(savedTicket), media: supportMedia};
+    return { ticket: this.transformTicket(savedTicket), media: supportMedia };
   }
 
   async findAllByUser(

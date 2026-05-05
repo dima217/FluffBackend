@@ -70,5 +70,10 @@ export class SupportTicket {
   @ApiProperty({ description: 'Date when ticket was last updated' })
   @UpdateDateColumn()
   updatedAt: Date;
-}
 
+  @ApiProperty({
+    description: 'Скриншот к обращению',
+  })
+  @Column({ type: 'text', nullable: true })
+  screenshot: string | null;
+}
