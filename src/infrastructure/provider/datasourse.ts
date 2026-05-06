@@ -15,6 +15,7 @@ import { Favorite } from '@domain/entities/favorite.entity';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 import { Notification } from '@domain/entities';
 import { SupportTicket } from '@domain/entities/support-ticket.entity';
+import { RecipeRating } from '@domain/entities/recipe.rating.entity';
 
 export const databaseProviders = [
   {
@@ -43,6 +44,7 @@ export const databaseProviders = [
           Recipe,
           Review,
           Favorite,
+          RecipeRating,
         ],
         synchronize: false,
         logging: appConfig?.nodeEnv === 'development',

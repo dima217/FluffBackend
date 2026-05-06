@@ -15,6 +15,7 @@ import { Favorite } from './src/domain/entities/favorite.entity';
 import { Notification } from './src/domain/entities/notification.entity';
 import * as dotenv from 'dotenv';
 import { SupportTicket } from '@domain/entities/support-ticket.entity';
+import { RecipeRating } from '@domain/entities/recipe.rating.entity';
 
 // Загружаем переменные окружения
 dotenv.config();
@@ -41,6 +42,7 @@ export const AppDataSource = new DataSource({
     Recipe,
     Review,
     Favorite,
+    RecipeRating,
   ],
   migrations: ['src/migrations/*.ts'], // Папка для миграций
   migrationsTableName: 'migrations',

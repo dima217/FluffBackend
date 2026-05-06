@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductResponseDto } from './product.dto';
+import { Recipe } from '@domain/entities';
 
 export class RecipeImageDto {
   @ApiProperty({
@@ -224,7 +225,10 @@ export class CreateRecipeWithMediaIdsDto {
   @IsBoolean()
   makePublic: boolean;
 
-  @ApiProperty({ example: false, description: 'Request to submit recipe for others users recommendations' })
+  @ApiProperty({
+    example: false,
+    description: 'Request to submit recipe for others users recommendations',
+  })
   @IsBoolean()
   @IsOptional()
   submitToSystem: false | null;
@@ -310,7 +314,10 @@ export class CreateRecipeDto {
   @IsBoolean()
   makePublic: boolean;
 
-  @ApiProperty({ example: false, description: 'Request to submit recipe for others users recommendations' })
+  @ApiProperty({
+    example: false,
+    description: 'Request to submit recipe for others users recommendations',
+  })
   @IsBoolean()
   submitToSystem: boolean;
 }
@@ -562,7 +569,11 @@ export class UpdateRecipeDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
+  @ApiPropertyOptional({
+    type: [Number],
+    example: [1, 2, 3],
+    description: 'Product IDs from database',
+  })
   @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })
@@ -631,7 +642,7 @@ export class RecipeResponseDto {
   average: number;
 
   @ApiProperty({ example: false, description: 'Whether the recipe is in user favorites' })
-  favorite: boolean;
+  favorite?: boolean;
 
   @ApiProperty({ type: RecipeImageDto, description: 'Recipe images' })
   image: RecipeImageDto;
@@ -672,4 +683,10 @@ export class RecipeResponseDto {
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Last update date' })
   updatedAt: Date;
+
+  userRating?: number | null;
 }
+
+export type RecipeWithUserRating = Recipe & {
+  userRating: number | null;
+};

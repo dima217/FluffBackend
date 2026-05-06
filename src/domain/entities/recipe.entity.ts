@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import { IsNotEmpty, Min, Max } from 'class-validator';
 import { User } from './user.entity';
 import { Product } from './product.entity';
 import { RecipeType } from './recipe-type.entity';
+import { RecipeRating } from './recipe.rating.entity';
 
 export interface RecipeImage {
   cover: string;
@@ -89,7 +91,7 @@ export class Recipe {
   @Column('jsonb', { nullable: true })
   customProducts: string[] | null;
 
-	@Column('boolean', { default: false, nullable: true })
+  @Column('boolean', { default: false, nullable: true })
   isFluff: boolean | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -107,9 +109,15 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({type: 'boolean', nullable: false})
-	makePublic: boolean;
+  @Column({ type: 'boolean', nullable: false })
+  makePublic: boolean;
 
-	@Column({type: 'boolean', nullable: true})
-	submitToSystem: boolean;
+  @Column({ type: 'boolean', nullable: true })
+  submitToSystem: boolean;
+
+  @OneToMany(() => RecipeRating, (rating) => rating.recipe)
+  ratings: RecipeRating[];
+
+  @Column('int', { default: 0 })
+  ratingsCount: number;
 }

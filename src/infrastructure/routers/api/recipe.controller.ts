@@ -395,10 +395,17 @@ export class RecipeController {
     description: 'Retrieve recipes by their IDs',
   })
   @ApiBearerAuth('JWT-auth')
-  @ApiResponse({ status: 200, description: 'Recipes retrieved successfully', type: [RecipeResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Recipes retrieved successfully',
+    type: [RecipeResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findByIds(@UserDecorator() user: UserEntity, @Query('ids') ids: string): Promise<RecipeResponseDto[]> {
-    const idsArray = ids.split(',').map(id => parseInt(id, 10));
+  async findByIds(
+    @UserDecorator() user: UserEntity,
+    @Query('ids') ids: string,
+  ): Promise<RecipeResponseDto[]> {
+    const idsArray = ids.split(',').map((id) => parseInt(id, 10));
     const recipes = await this.recipeService.findByIds(idsArray);
     const favoriteIds = await this.recipeService.getFavoriteIds(user.id);
     return RecipeMapper.toResponseDtoList(recipes, favoriteIds);
@@ -523,7 +530,7 @@ export class RecipeController {
     @UserDecorator() user: UserEntity | null,
   ): Promise<RecipeResponseDto> {
     const userId = user?.id || null;
-    const recipe = await this.recipeService.findOne(id);
+    const recipe = await this.recipeService.findOne(id, user?.id);
     const favoriteIds = await this.recipeService.getFavoriteIds(userId);
     return RecipeMapper.toResponseDto(recipe, favoriteIds);
   }
@@ -551,6 +558,59 @@ export class RecipeController {
     const recipe = await this.recipeService.update(id, userId, updateDto);
     const favoriteIds = await this.recipeService.getFavoriteIds(userId);
     return RecipeMapper.toResponseDto(recipe, favoriteIds);
+  }
+
+  @Post(':id/rate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rate recipe',
+    description:
+      'Rate a recipe from 1 to 5 stars. If user already rated this recipe, the rating will be updated.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({ name: 'id', type: Number, description: 'Recipe ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        value: {
+          type: 'number',
+          minimum: 1,
+          maximum: 5,
+          example: 5,
+        },
+      },
+      required: ['value'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recipe rated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        average: { type: 'number', example: 4.5 },
+        ratingCounts: { type: 'number', example: 10 },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid rating value' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Recipe not found' })
+  async rateRecipe(
+    @Param('id', ParseIntPipe) id: number,
+    @UserDecorator() user: UserEntity,
+    @Body('value') value: number,
+  ): Promise<{ average: number; ratingCounts: number }> {
+    if (!user) {
+      throw new ForbiddenException('Authentication required');
+    }
+
+    if (value < 1 || value > 5) {
+      throw new BadRequestException('Rating must be between 1 and 5');
+    }
+
+    return await this.recipeService.rateRecipe(id, user.id, value);
   }
 
   @Delete(':id')

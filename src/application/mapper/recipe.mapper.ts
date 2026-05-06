@@ -4,11 +4,16 @@ import {
   CreateRecipeWithMediaIdsDto,
   UpdateRecipeDto,
   RecipeResponseDto,
+  RecipeWithUserRating,
 } from '@application/dto/recipe.dto';
 import type { User } from '@domain/entities/user.entity';
 import type { RecipeType } from '@domain/entities/recipe-type.entity';
 import type { Product } from '@domain/entities/product.entity';
 import { ProductResponseDto } from '@application/dto';
+
+function hasUserRating(recipe: Recipe | RecipeWithUserRating): recipe is RecipeWithUserRating {
+  return 'userRating' in recipe;
+}
 
 export class RecipeMapper {
   static toEntity(
@@ -27,7 +32,10 @@ export class RecipeMapper {
       promotionalVideo: createDto.promotionalVideo || null,
       description: createDto.description || null,
       products,
-      customProducts: createDto.customProducts && createDto.customProducts.length > 0 ? createDto.customProducts : null,
+      customProducts:
+        createDto.customProducts && createDto.customProducts.length > 0
+          ? createDto.customProducts
+          : null,
       isFluff: createDto.isFluff || null,
       calories: createDto.calories,
       cookAt: createDto.cookAt,
@@ -82,7 +90,10 @@ export class RecipeMapper {
       promotionalVideoMediaId,
       description: createDto.description || null,
       products,
-      customProducts: createDto.customProducts && createDto.customProducts.length > 0 ? createDto.customProducts : null,
+      customProducts:
+        createDto.customProducts && createDto.customProducts.length > 0
+          ? createDto.customProducts
+          : null,
       isFluff: createDto.isFluff,
       calories: createDto.calories,
       cookAt: createDto.cookAt,
@@ -92,7 +103,10 @@ export class RecipeMapper {
     } as Recipe;
   }
 
-  static toResponseDto(recipe: Recipe, favoriteIds?: Set<number>): RecipeResponseDto {
+  static toResponseDto(
+    recipe: Recipe | RecipeWithUserRating,
+    favoriteIds?: Set<number>,
+  ): RecipeResponseDto {
     return {
       id: recipe.id,
       user: recipe.user
@@ -120,6 +134,7 @@ export class RecipeMapper {
       stepsConfig: recipe.stepsConfig,
       createdAt: recipe.createdAt,
       updatedAt: recipe.updatedAt,
+      userRating: hasUserRating(recipe) ? recipe.userRating : null,
     };
   }
 

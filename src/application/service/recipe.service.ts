@@ -26,12 +26,16 @@ import {
   PrepareVideoUploadDto,
   PrepareVideoUploadResponseDto,
   ConfirmRecipeUploadDto,
+  RecipeResponseDto,
+  RecipeWithUserRating,
 } from '@application/dto/recipe.dto';
 import { RecipeMapper } from '@application/mapper/recipe.mapper';
 import { RelatedEntityType } from '@domain/enums/related-entity-type.enum';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { MediaService } from '@application/service/media.service';
 import type { AppConfig } from '@config';
+import { RecipeRating } from '@domain/entities/recipe.rating.entity';
+import type { IRecipeRatingRepository } from '@domain/interface/rating.repository';
 
 @Injectable()
 export class RecipeService implements IRecipeService {
@@ -48,6 +52,8 @@ export class RecipeService implements IRecipeService {
     private readonly userRepository: IUserRepository,
     @Inject(REPOSITORY_CONSTANTS.FAVORITE_REPOSITORY)
     private readonly favoriteRepository: IFavoriteRepository,
+    @Inject(REPOSITORY_CONSTANTS.RATING_REPOSITORY)
+    private readonly ratingRepository: IRecipeRatingRepository,
     private readonly mediaService: MediaService,
     private readonly configService: ConfigService<AppConfig>,
   ) {}
@@ -309,9 +315,20 @@ export class RecipeService implements IRecipeService {
     await this.mediaService.markAsLoaded(mediaId, token);
   }
 
-  async findOne(id: number): Promise<Recipe> {
-    this.logger.log(`Finding recipe with ID: ${id}`);
-    return await this.recipeRepository.findOne(id);
+  async findOne(id: number, userId?: number | null): Promise<RecipeWithUserRating> {
+    const recipe = await this.recipeRepository.findOne(id);
+
+    let userRating: number | null = null;
+
+    if (userId) {
+      const rating = await this.ratingRepository.findByUserAndRecipe(userId, id);
+      userRating = rating?.value ?? null;
+    }
+
+    return {
+      ...recipe,
+      userRating,
+    };
   }
 
   async findAll(
@@ -555,5 +572,52 @@ export class RecipeService implements IRecipeService {
     }
 
     await this.recipeRepository.delete(id);
+  }
+
+  async rateRecipe(
+    id: number,
+    userId: number,
+    value: number,
+  ): Promise<{ average: number; ratingCounts: number }> {
+    this.logger.log(`User ${userId} rates recipe ${id} with ${value}`);
+
+    if (value < 1 || value > 5) {
+      throw new BadRequestException('Rating must be between 1 and 5');
+    }
+
+    const recipe = await this.recipeRepository.findOne(id);
+    if (!recipe) {
+      throw new NotFoundException('Recipe not found');
+    }
+
+    const user = await this.userRepository.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existing = await this.ratingRepository.findByUserAndRecipe(userId, id);
+
+    if (existing) {
+      await this.ratingRepository.update(existing.id, value);
+    } else {
+      const rating = new RecipeRating();
+      rating.recipe = recipe;
+      rating.user = user;
+      rating.value = value;
+
+      await this.ratingRepository.create(rating);
+    }
+
+    const average = await this.ratingRepository.getAverage(id);
+    const count = await this.ratingRepository.getCount(id);
+
+    await this.recipeRepository.update(id, {
+      average,
+    });
+
+    return {
+      average,
+      ratingCounts: count,
+    };
   }
 }

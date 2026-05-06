@@ -29,7 +29,10 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
     return recipe;
   }
 
-  async findAll(isSuperUser: boolean, options?: { page: number; limit: number }): Promise<{ data: Recipe[]; total: number }> {
+  async findAll(
+    isSuperUser: boolean,
+    options?: { page: number; limit: number },
+  ): Promise<{ data: Recipe[]; total: number }> {
     const whereCondition = isSuperUser ? {} : { makePublic: true };
 
     if (!options) {
@@ -53,7 +56,10 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
     return { data, total };
   }
 
-  async findByRequests(options?: { page: number; limit: number }): Promise<{ data: Recipe[]; total: number }> {
+  async findByRequests(options?: {
+    page: number;
+    limit: number;
+  }): Promise<{ data: Recipe[]; total: number }> {
     if (!options) {
       const data = await this.repository.find({
         where: { makePublic: true },
@@ -70,7 +76,7 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
       relations: ['user', 'type', 'products'],
       skip,
       take: limit,
-    })
+    });
     return { data, total };
   }
 
@@ -101,32 +107,32 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
       .leftJoinAndSelect('recipe.user', 'user')
       .leftJoinAndSelect('recipe.type', 'type')
       .leftJoinAndSelect('recipe.products', 'products');
-  
+
     const hasProducts = productIds.length > 0;
     const hasSearchTerm = searchTerm && searchTerm.trim().length > 0;
-  
+
     if (!hasProducts && !hasSearchTerm) {
       return [];
     }
-  
+
     queryBuilder.andWhere('recipe.makePublic = :isPublic', { isPublic: true });
-  
+
     if (useOr) {
       const conditions: string[] = [];
       const params: Record<string, any> = {};
-  
+
       if (hasProducts) {
         conditions.push(
           `EXISTS (SELECT 1 FROM recipe_products rp WHERE rp.recipe_id = recipe.id AND rp.product_id IN (:...productIds))`,
         );
         params.productIds = productIds;
       }
-  
+
       if (hasSearchTerm) {
         params.searchTerm = `%${searchTerm.trim()}%`;
         conditions.push('LOWER(recipe.name) LIKE LOWER(:searchTerm)');
       }
-  
+
       if (conditions.length > 0) {
         queryBuilder.andWhere(`(${conditions.join(' OR ')})`, params);
       }
@@ -139,14 +145,14 @@ export class RecipeRepositoryAdapter implements IRecipeRepository {
           { productIds },
         );
       }
-  
+
       if (hasSearchTerm) {
         queryBuilder.andWhere('LOWER(recipe.name) LIKE LOWER(:searchTerm)', {
           searchTerm: `%${searchTerm.trim()}%`,
         });
       }
     }
-  
+
     return await queryBuilder.getMany();
   }
 
