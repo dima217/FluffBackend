@@ -76,7 +76,7 @@ export class UpdateProfileDto {
   @Min(20)
   @Max(500)
   weight?: number;
-  
+
   @ApiPropertyOptional({
     example: 'Running',
     description: 'Sport activity',
@@ -114,6 +114,14 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   timezone?: string;
+
+  @IsOptional()
+  @IsNumber()
+  recipeToCheatMealId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  recipeFromCheatMealId?: number;
 }
 
 export class ProfileResponseDto {

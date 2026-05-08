@@ -47,8 +47,12 @@ export class Profile {
   @Column('varchar', { length: 64, default: 'UTC' })
   timezone: string;
 
+  @Column('decimal', { array: true, default: [] })
+  cheatMeal: number[];
+
   @CreateDateColumn()
   createdAt: Date;
+
   @UpdateDateColumn()
   updatedAt: Date;
 }

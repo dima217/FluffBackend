@@ -75,6 +75,7 @@ export class ProfileRepositoryAdapter implements IProfileRepository {
       cheatMealDay: profile.cheatMealDay,
       periodOfDays: profile.periodOfDays,
       timezone: profile.timezone,
+      cheatMeal: profile.cheatMeal,
     });
 
     return await this.repository.save(existingProfile);
