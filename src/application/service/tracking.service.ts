@@ -146,6 +146,9 @@ export class TrackingService implements ITrackingService {
     if (updateDto.calories !== undefined) {
       updateData.calories = updateDto.calories;
     }
+    if (updateDto.created !== undefined) {
+      updateData.created = new Date(updateDto.created);
+    }
     const updated = await this.trackingRepository.update(id, updateData, userId);
     await this.invalidateStatisticsCache();
     return updated;

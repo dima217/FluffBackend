@@ -47,6 +47,7 @@ export class TrackingController {
       'Create a new tracking record. You can either:\n\n' +
       '**Option 1: Custom tracking** - Provide name and calories manually (e.g., "хуй моржовый 100000кг" with any calories)\n' +
       '**Option 2: Recipe tracking** - Provide recipeId to automatically use recipe name and calories\n\n' +
+      '**Optional:** `created` — ISO 8601 datetime when the meal was consumed (defaults to now).\n\n' +
       '**Note:** Either recipeId OR both name and calories must be provided.',
   })
   @ApiBody({ type: CreateTrackingDto })
@@ -206,7 +207,8 @@ export class TrackingController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Update tracking',
-    description: 'Update an existing tracking record (only for current user)',
+    description:
+      'Update an existing tracking record (only for current user). You can change name, calories, and meal time (`created`).',
   })
   @ApiParam({ name: 'id', type: Number, description: 'Tracking ID' })
   @ApiBody({ type: UpdateTrackingDto })

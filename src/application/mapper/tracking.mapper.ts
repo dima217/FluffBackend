@@ -14,6 +14,7 @@ export class TrackingMapper {
 			name: createDto.name || (recipe ? recipe.name : ''),
 			calories: createDto.calories || (recipe ? recipe.calories : 0),
 			recipe: recipe,
+			created: createDto.created ? new Date(createDto.created) : new Date(),
 		} as Tracking;
 	}
 

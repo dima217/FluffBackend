@@ -1,6 +1,5 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -35,6 +34,6 @@ export class Tracking {
   @JoinColumn({ name: 'recipe_id' })
   recipe: Recipe | null;
 
-  @CreateDateColumn()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created: Date;
 }

@@ -40,6 +40,16 @@ export class CreateTrackingDto {
   @IsOptional()
   @IsInt()
   recipeId?: number;
+
+  @ApiPropertyOptional({
+    example: '2024-01-15T12:30:00.000Z',
+    description:
+      'When the meal was consumed (ISO 8601). If omitted, the current time is used.',
+  })
+  @IsOptional()
+  @IsDateString()
+  @Type(() => Date)
+  created?: Date;
 }
 
 export class UpdateTrackingDto {
@@ -54,6 +64,15 @@ export class UpdateTrackingDto {
   @IsNumber()
   @Min(0.01)
   calories?: number;
+
+  @ApiPropertyOptional({
+    example: '2024-01-15T12:30:00.000Z',
+    description: 'When the meal was consumed (ISO 8601)',
+  })
+  @IsOptional()
+  @IsDateString()
+  @Type(() => Date)
+  created?: Date;
 }
 
 export class TrackingResponseDto {
@@ -72,7 +91,10 @@ export class TrackingResponseDto {
   })
   recipeId?: number | null;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Creation date' })
+  @ApiProperty({
+    example: '2024-01-01T12:30:00.000Z',
+    description: 'When the meal was consumed',
+  })
   created: Date;
 }
 
