@@ -148,6 +148,11 @@ export class SupportService implements ISupportService {
     return this.transformTicket(ticket);
   }
 
+  async deleteByUser(ticketId: number, userId: number): Promise<void> {
+    await this.supportTicketRepository.findOne(ticketId, userId);
+    await this.supportTicketRepository.delete(ticketId);
+  }
+
   async findAllAdmin(query: SupportTicketQueryDto): Promise<SupportTicketsResponse> {
     const {
       limit = 20,

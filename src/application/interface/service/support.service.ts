@@ -19,6 +19,7 @@ export interface ISupportService {
   ): Promise<{ ticket: SupportTicketResponseDto; media: CreateMediaResponseDto | null }>;
   findAllByUser(userId: number, query: SupportTicketQueryDto): Promise<SupportTicketsResponse>;
   findOneByUser(ticketId: number, userId: number): Promise<SupportTicketResponseDto>;
+  deleteByUser(ticketId: number, userId: number): Promise<void>;
   findAllAdmin(query: SupportTicketQueryDto): Promise<SupportTicketsResponse>;
   findOneAdmin(ticketId: number): Promise<SupportTicketResponseDto>;
   replyToTicket(ticketId: number, replyDto: ReplyToTicketDto): Promise<SupportTicketResponseDto>;

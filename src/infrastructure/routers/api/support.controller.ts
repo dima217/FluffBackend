@@ -2,10 +2,14 @@
     Controller,
     Get,
     Post,
+    Delete,
     Body,
     Param,
     UseGuards,
     Query,
+    HttpCode,
+    HttpStatus,
+    ParseIntPipe,
   } from '@nestjs/common';
   import {
     ApiTags,
@@ -173,6 +177,39 @@ import { CreateMediaResponseDto } from '@application/interface/service/media.ser
     })
     async findOneByUser(@UserDecorator() user: UserEntity, @Param('id') id: string): Promise<SupportTicketResponseDto> {
       return await this.supportService.findOneByUser(parseInt(id, 10), user.id);
+    }
+
+    @Delete('tickets/:id')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({
+      summary: 'Delete a support ticket',
+      description:
+        'Allows the ticket owner to permanently delete their support ticket and all related chat messages.',
+    })
+    @ApiParam({
+      name: 'id',
+      type: Number,
+      description: 'Ticket ID',
+      example: 1,
+    })
+    @ApiResponse({
+      status: 204,
+      description: 'Ticket deleted successfully',
+    })
+    @ApiResponse({
+      status: 401,
+      description: 'Unauthorized - Invalid or missing JWT token',
+    })
+    @ApiResponse({
+      status: 404,
+      description: 'Ticket not found',
+    })
+    async deleteByUser(
+      @UserDecorator() user: UserEntity,
+      @Param('id', ParseIntPipe) id: number,
+    ): Promise<void> {
+      await this.supportService.deleteByUser(id, user.id);
     }
 
     @Get('tickets/:id/messages')
