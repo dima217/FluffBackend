@@ -11,7 +11,7 @@ import { MediaService } from './service/media.service';
 import { NotificationRegistrationObservable } from './service/observable/notification.service';
 import { PasswordChangeNotificationObservable } from './service/observable/password-change-notification.service';
 import { OAuthModule } from './service/oauth/oauth.module';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DomainUserService } from '@domain/service/user.serviece';

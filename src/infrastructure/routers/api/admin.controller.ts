@@ -36,7 +36,7 @@ import { CreateRecipeDto, RecipeResponseDto, UpdateRecipeDto } from '@applicatio
 import { CreateProductDto, ProductResponseDto, UpdateProductDto } from '@application/dto/product.dto';
 import { IsSuperGuard } from '@infrastructure/guards/is-super.guard';
 import { JwtAuthGuard } from '@infrastructure/guards/jwt-auth.guard';
-import { SupportTicketQueryDto, SupportTicketResponseDto, ReplyToTicketDto, UpdateTicketStatusDto } from '@application/dto/support.dto';
+import { SupportTicketQueryDto, SupportTicketResponseDto, ReplyToTicketDto, UpdateTicketStatusDto, GetMessagesQueryDto, SupportMessageResponseDto } from '@application/dto/support.dto';
 import { SupportTicketStatus } from '@domain/entities/support-ticket.entity';
 import { SupportService } from '@application/service/support.service';
 
@@ -545,5 +545,26 @@ export class AdminController {
     @Body() updateDto: UpdateTicketStatusDto,
   ): Promise<SupportTicketResponseDto> {
     return await this.supportService.updateStatus(parseInt(id, 10), updateDto);
+  }
+
+  @Get('/tickets/:id/messages')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get chat messages for a ticket (Admin only)',
+    description: 'Returns the full chat history for a support ticket.',
+  })
+  @ApiParam({ name: 'id', type: Number, description: 'Ticket ID' })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiQuery({ name: 'beforeId', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'Messages retrieved', type: [SupportMessageResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Ticket not found' })
+  async getTicketMessages(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: GetMessagesQueryDto,
+  ): Promise<SupportMessageResponseDto[]> {
+    return await this.supportService.getMessages(id, 0, true, query);
   }
 }

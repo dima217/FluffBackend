@@ -1,4 +1,4 @@
-import {
+  import {
     Controller,
     Get,
     Post,
@@ -17,7 +17,7 @@ import {
     ApiQuery,
   } from '@nestjs/swagger';
   import { SupportService } from '@application/service/support.service';
-  import { CreateSupportTicketDto } from '@application/dto/support.dto';
+  import { CreateSupportTicketDto, GetMessagesQueryDto, SupportMessageResponseDto } from '@application/dto/support.dto';
   import { SupportTicketQueryDto } from '@application/dto/support.dto';
   import { SupportTicketResponseDto } from '@application/dto/support.dto';
   import { JwtAuthGuard } from '@infrastructure/guards/jwt-auth.guard';
@@ -173,6 +173,27 @@ import { CreateMediaResponseDto } from '@application/interface/service/media.ser
     })
     async findOneByUser(@UserDecorator() user: UserEntity, @Param('id') id: string): Promise<SupportTicketResponseDto> {
       return await this.supportService.findOneByUser(parseInt(id, 10), user.id);
+    }
+
+    @Get('tickets/:id/messages')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+      summary: 'Get chat messages for a ticket',
+      description:
+        'Returns the chat history for a ticket. Supports cursor-based pagination via `beforeId`.',
+    })
+    @ApiParam({ name: 'id', type: Number, description: 'Ticket ID' })
+    @ApiQuery({ name: 'limit', type: Number, required: false, description: 'Max messages to return (default 50)' })
+    @ApiQuery({ name: 'beforeId', type: Number, required: false, description: 'Load messages before this message ID' })
+    @ApiResponse({ status: 200, description: 'Messages retrieved', type: [SupportMessageResponseDto] })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'Ticket not found' })
+    async getMessages(
+      @UserDecorator() user: UserEntity,
+      @Param('id') id: string,
+      @Query() query: GetMessagesQueryDto,
+    ): Promise<SupportMessageResponseDto[]> {
+      return await this.supportService.getMessages(parseInt(id, 10), user.id, false, query);
     }
 }
   

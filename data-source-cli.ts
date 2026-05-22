@@ -15,6 +15,7 @@ import { Favorite } from './src/domain/entities/favorite.entity';
 import { Notification } from './src/domain/entities/notification.entity';
 import * as dotenv from 'dotenv';
 import { SupportTicket } from '@domain/entities/support-ticket.entity';
+import { SupportMessage } from '@domain/entities/support-message.entity';
 import { RecipeRating } from '@domain/entities/recipe.rating.entity';
 
 // Загружаем переменные окружения
@@ -37,6 +38,7 @@ export const AppDataSource = new DataSource({
     Tracking,
     Product,
     SupportTicket,
+    SupportMessage,
     Notification,
     RecipeType,
     Recipe,

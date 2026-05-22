@@ -22,6 +22,7 @@ import { ViewCacheCronService } from './service/view-cache-cron.service';
 import { PROVIDER_CONSTANTS } from '@domain/interface/constant';
 import { notificarionRepository } from './provider/repository/notification.provider';
 import { supportRepository } from './provider/repository/support.provider';
+import { supportMessageRepository } from './provider/repository/support-message.provider';
 import { ratingRepository } from './provider/repository/rating.provider';
 
 @Global()
@@ -44,6 +45,7 @@ import { ratingRepository } from './provider/repository/rating.provider';
     ...reviewRepository,
     ...favoriteRepository,
     ...supportRepository,
+    ...supportMessageRepository,
     ...codeProviders,
     DomainCodeService,
     RoleInitService,
@@ -70,6 +72,7 @@ import { ratingRepository } from './provider/repository/rating.provider';
     ...productRepository,
     ...recipeTypeRepository,
     ...supportRepository,
+    ...supportMessageRepository,
     ...recipeRepository,
     ...reviewRepository,
     ...favoriteRepository,

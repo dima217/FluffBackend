@@ -63,6 +63,18 @@ export class SupportTicket {
   @Column({ type: 'text', nullable: true, default: null })
   adminResponse: string | null;
 
+  @ApiProperty({ description: 'Whether admin has seen/opened this ticket chat', default: false })
+  @Column({ default: false })
+  adminSeen: boolean;
+
+  @ApiProperty({ description: 'When the user last read admin messages', nullable: true })
+  @Column({ type: 'timestamp', nullable: true, default: null })
+  userLastReadAt: Date | null;
+
+  @ApiProperty({ description: 'When admin last sent a message', nullable: true })
+  @Column({ type: 'timestamp', nullable: true, default: null })
+  lastAdminMessageAt: Date | null;
+
   @ApiProperty({ description: 'Date when ticket was created' })
   @CreateDateColumn()
   createdAt: Date;
