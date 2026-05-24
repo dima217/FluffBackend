@@ -77,7 +77,7 @@ export class RecipeService implements IRecipeService {
     // Fetch products from database if productIds are provided
     const products =
       createDto.productIds && createDto.productIds.length > 0
-        ? await Promise.all(createDto.productIds.map((id) => this.productRepository.findOne(id)))
+        ? await this.loadProductsByIds(createDto.productIds)
         : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
@@ -108,7 +108,7 @@ export class RecipeService implements IRecipeService {
     // Fetch products from database if productIds are provided
     const products =
       createDto.productIds && createDto.productIds.length > 0
-        ? await Promise.all(createDto.productIds.map((id) => this.productRepository.findOne(id)))
+        ? await this.loadProductsByIds(createDto.productIds)
         : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
@@ -532,10 +532,7 @@ export class RecipeService implements IRecipeService {
     }
 
     if (updateDto.productIds !== undefined) {
-      const products = await Promise.all(
-        updateDto.productIds.map((productId) => this.productRepository.findOne(productId)),
-      );
-      updateData.products = products;
+      updateData.products = await this.loadProductsByIds(updateDto.productIds);
     }
 
     if (updateDto.customProducts !== undefined) {
@@ -619,5 +616,20 @@ export class RecipeService implements IRecipeService {
       average,
       ratingCounts: count,
     };
+  }
+
+  private normalizeProductIds(productIds: Array<number | { id: number }>): number[] {
+    return productIds.map((item) => {
+      if (typeof item === 'number') return item;
+      if (typeof item === 'object' && item !== null && 'id' in item) {
+        return Number(item.id);
+      }
+      throw new BadRequestException('Each productIds entry must be a number or an object with id');
+    });
+  }
+
+  private async loadProductsByIds(productIds: Array<number | { id: number }>) {
+    const ids = this.normalizeProductIds(productIds);
+    return Promise.all(ids.map((id) => this.productRepository.findOne(id)));
   }
 }
