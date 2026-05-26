@@ -47,6 +47,7 @@ export interface SupportTicketCreatedPayload {
 export interface SupportTicketRepliedPayload {
   ticketId: number;
   userId: number;
+  subject: string;
   response: string;
   status: string;
   updatedAt: Date;

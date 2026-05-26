@@ -6,6 +6,11 @@ import type { IProfileRepository } from '@domain/interface/profile.repository';
 import type { ITrackingRepository } from '@domain/interface/tracking.repository';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { PushEventsService } from './push-event.service';
+import {
+  PushNotificationContent,
+  PushNotificationType,
+  pushDataString,
+} from '@application/constants/push-notification.types';
 import { Profile } from '@domain/entities/profile.entity';
 
 @Injectable()
@@ -68,15 +73,16 @@ export class TrackingReminderCronService {
     if (stats.totalCalories >= dailyTarget) return;
 
     const caloriesLeft = Math.max(0, Math.round(dailyTarget - stats.totalCalories));
+    const { title, body } = PushNotificationContent.trackingReminder(caloriesLeft);
     await this.pushEventsService.sendToUserIds(
       [userId],
-      'Not enough calories today',
-      `You still need around ${caloriesLeft} kcal today. Add one more meal to stay on track.`,
+      title,
+      body,
       {
-        type: 'tracking_reminder',
-        targetCalories: String(Math.round(dailyTarget)),
-        consumedCalories: String(Math.round(stats.totalCalories)),
-        caloriesLeft: String(caloriesLeft),
+        type: PushNotificationType.TRACKING_REMINDER,
+        targetCalories: pushDataString(Math.round(dailyTarget)),
+        consumedCalories: pushDataString(Math.round(stats.totalCalories)),
+        caloriesLeft: pushDataString(caloriesLeft),
         date: localNow.dateKey,
       },
     );

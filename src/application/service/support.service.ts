@@ -24,6 +24,7 @@ import type { ISupportRepository } from '@domain/interface/support.repository';
 import type { ISupportMessageRepository } from '@domain/interface/support-message.repository';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { MediaService } from './media.service';
+import { PushEventsService } from './push-event.service';
 import { ISupportService } from '@application/interface/service/support.service';
 import { CreateMediaResponseDto } from '@application/interface/service/media.service';
 
@@ -77,6 +78,7 @@ export class SupportService implements ISupportService {
     @Inject(forwardRef(() => AppWebSocketGateway))
     private webSocketGateway: AppWebSocketGateway,
     private readonly mediaService: MediaService,
+    private readonly pushEventsService: PushEventsService,
   ) {}
 
   // ─── Tickets ─────────────────────────────────────────────────────────────────
@@ -200,10 +202,19 @@ export class SupportService implements ISupportService {
     this.webSocketGateway.emitSupportTicketReplied({
       ticketId: updated.id,
       userId: updated.userId,
+      subject: updated.subject,
       response: updated.adminResponse || '',
       status: updated.status,
       updatedAt: updated.updatedAt,
     });
+
+    await this.pushEventsService.notifySupportTicketReply(
+      updated.userId,
+      updated.id,
+      updated.subject,
+      updated.adminResponse ?? '',
+      updated.status,
+    );
 
     return this.transformTicket(updated);
   }
@@ -277,13 +288,27 @@ export class SupportService implements ISupportService {
     });
 
     if (senderType === 'admin') {
+      const newStatus =
+        ticket.status === SupportTicketStatus.OPEN
+          ? SupportTicketStatus.IN_PROGRESS
+          : ticket.status;
+
       await this.supportTicketRepository.update(ticketId, {
         lastAdminMessageAt: message.createdAt,
-        status:
-          ticket.status === SupportTicketStatus.OPEN
-            ? SupportTicketStatus.IN_PROGRESS
-            : ticket.status,
+        status: newStatus,
       });
+
+      const preview =
+        normalizedContent ||
+        (normalizedAttachments.length > 0 ? 'Вложение к сообщению' : '');
+
+      await this.pushEventsService.notifySupportTicketReply(
+        ticket.userId,
+        ticketId,
+        ticket.subject,
+        preview,
+        newStatus,
+      );
     }
 
     return this.transformMessage(message);
