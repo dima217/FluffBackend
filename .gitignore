@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /secrets
+/backups
 
 # Logs
 logs
@@ -44,4 +45,8 @@ lerna-debug.log*
 
 # Misc
 .husky/_
+
+# Railway
+/docker-compose.railway.yml
+/docker-compose.loki.railway.yml
 
