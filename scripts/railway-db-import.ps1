@@ -1,4 +1,4 @@
-# Import backups/fluff_backup.dump to Railway PostgreSQL
+# Import backups/fluff_backup.dump to Railway PostgreSQL (UTF-8 safe)
 # Run: .\scripts\railway-db-import.ps1
 
 $ErrorActionPreference = "Stop"
@@ -19,11 +19,20 @@ if (-not (Test-Path $BackupFile)) {
     Write-Error "Backup not found: $BackupFile. Run .\scripts\railway-db-export.ps1 first."
 }
 
+$PgEnv = @{
+    PGPASSWORD       = $Password
+    PGSSLMODE        = "disable"
+    PGCLIENTENCODING = "UTF8"
+    LANG             = "C.UTF-8"
+}
+
 function Invoke-DockerPg {
     param([string[]]$PgArgs)
     docker run --rm `
-        -e PGPASSWORD=$Password `
-        -e PGSSLMODE=disable `
+        -e PGPASSWORD=$($PgEnv.PGPASSWORD) `
+        -e PGSSLMODE=$($PgEnv.PGSSLMODE) `
+        -e PGCLIENTENCODING=$($PgEnv.PGCLIENTENCODING) `
+        -e LANG=$($PgEnv.LANG) `
         postgres:16-alpine `
         @PgArgs
     if ($LASTEXITCODE -ne 0) {
@@ -31,10 +40,10 @@ function Invoke-DockerPg {
     }
 }
 
-Write-Host "==> Target: $Host_`:$Port / $Db"
+Write-Host "==> Target: $Host_`:$Port / $Db (UTF-8)"
 
 Write-Host "==> Test connection..."
-Invoke-DockerPg @("psql", "-h", $Host_, "-p", $Port, "-U", $User, "-d", $Db, "-c", "SELECT version();")
+Invoke-DockerPg @("psql", "-h", $Host_, "-p", $Port, "-U", $User, "-d", $Db, "-c", "SHOW server_encoding;")
 
 Write-Host "==> Reset public schema..."
 Invoke-DockerPg @(
@@ -45,15 +54,17 @@ Invoke-DockerPg @(
 Write-Host "==> pg_restore..."
 docker run --rm `
     -v "${Root}/backups:/backups:ro" `
-    -e PGPASSWORD=$Password `
-    -e PGSSLMODE=disable `
+    -e PGPASSWORD=$($PgEnv.PGPASSWORD) `
+    -e PGSSLMODE=$($PgEnv.PGSSLMODE) `
+    -e PGCLIENTENCODING=$($PgEnv.PGCLIENTENCODING) `
+    -e LANG=$($PgEnv.LANG) `
     postgres:16-alpine `
     pg_restore -h $Host_ -p $Port -U $User -d $Db --no-owner --no-acl --verbose /backups/fluff_backup.dump
 if ($LASTEXITCODE -ne 0) {
     throw "pg_restore failed (exit $LASTEXITCODE)"
 }
 
-Write-Host "==> Tables:"
-Invoke-DockerPg @("psql", "-h", $Host_, "-p", $Port, "-U", $User, "-d", $Db, "-c", "\dt")
+Write-Host "==> Verify Cyrillic sample..."
+Invoke-DockerPg @("psql", "-h", $Host_, "-p", $Port, "-U", $User, "-d", $Db, "-c", "SELECT name FROM product LIMIT 3;")
 
 Write-Host "OK: import finished."
