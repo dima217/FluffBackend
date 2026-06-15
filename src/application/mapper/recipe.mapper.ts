@@ -115,8 +115,8 @@ export class RecipeMapper {
     recipe: Recipe | RecipeWithUserRating,
     favoriteIds?: Set<number>,
   ): RecipeResponseDto {
-    const productGramsMap = new Map<number, number>(
-      (recipe.productGrams || []).map((pg) => [pg.productId, pg.grams]),
+    const productGramsMap = new Map<number, RecipeProductGrams>(
+      (recipe.productGrams || []).map((pg) => [pg.productId, pg]),
     );
 
     return {
@@ -139,7 +139,7 @@ export class RecipeMapper {
       promotionalVideo: recipe.promotionalVideo,
       description: recipe.description,
       products: (recipe.products || []).map((p) => {
-        const pg = recipe.productGrams?.find((g) => g.productId === p.id);
+        const pg = productGramsMap.get(p.id);
         return {
           id: p.id,
           name: p.name,
