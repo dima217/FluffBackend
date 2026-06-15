@@ -12,7 +12,6 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProductResponseDto } from './product.dto';
 import { Recipe } from '@domain/entities';
 
 export class RecipeImageDto {
@@ -145,6 +144,68 @@ export class RecipeStepsConfigWithMediaIdsDto {
   steps: RecipeStepWithMediaIdsDto[];
 }
 
+export class RecipeProductInputDto {
+  @ApiProperty({ example: 1, description: 'Product ID from database' })
+  @IsNumber()
+  id: number;
+
+  @ApiPropertyOptional({ example: 150, description: 'Amount in grams for this recipe' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  grams?: number;
+}
+
+export class RecipeCustomProductInputDto {
+  @ApiProperty({ example: 'молоко', description: 'Custom product name' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({ example: 200, description: 'Amount in grams for this recipe' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  grams?: number;
+}
+
+export class RecipeProductResponseDto {
+  @ApiProperty({ example: 1, description: 'Product ID' })
+  id: number;
+
+  @ApiProperty({ example: 'Tomato', description: 'Product name' })
+  name: string;
+
+  @ApiProperty({ example: 25, description: 'Calories per 100g' })
+  calories: number;
+
+  @ApiProperty({ example: 100, description: 'Mass in grams (catalog value)' })
+  massa: number;
+
+  @ApiPropertyOptional({ description: 'Product image' })
+  image: { cover: string; preview: string } | null;
+
+  @ApiProperty({ example: 5, description: 'Number of favorites' })
+  countFavorites: number;
+
+  @ApiProperty({ example: false, description: 'Is fluff product' })
+  isFluff: boolean;
+
+  @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Creation date' })
+  createdAt: Date;
+
+  @ApiPropertyOptional({ example: 150, description: 'Amount in grams used in this recipe' })
+  grams?: number;
+}
+
+export class RecipeCustomProductResponseDto {
+  @ApiProperty({ example: 'молоко', description: 'Custom product name' })
+  name: string;
+
+  @ApiPropertyOptional({ example: 200, description: 'Amount in grams' })
+  grams?: number;
+}
+
 export class CreateRecipeWithMediaIdsDto {
   @ApiProperty({ example: 'Delicious Pasta', description: 'Recipe name' })
   @IsString()
@@ -179,22 +240,26 @@ export class CreateRecipeWithMediaIdsDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @IsOptional()
-  productIds?: number[];
-
   @ApiPropertyOptional({
-    type: [String],
-    example: ['молоко', 'яйца', 'сахар'],
-    description:
-      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+    type: [RecipeProductInputDto],
+    description: 'Products from database with optional gram amounts',
   })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  customProducts?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => RecipeProductInputDto)
+  products?: RecipeProductInputDto[];
+
+  @ApiPropertyOptional({
+    type: [RecipeCustomProductInputDto],
+    example: [{ name: 'молоко', grams: 200 }, { name: 'яйца' }],
+    description: 'Custom product names with optional gram amounts, not linked to database products.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RecipeCustomProductInputDto)
+  customProducts?: RecipeCustomProductInputDto[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -268,22 +333,26 @@ export class CreateRecipeDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs from database' })
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @IsOptional()
-  productIds?: number[];
-
   @ApiPropertyOptional({
-    type: [String],
-    example: ['молоко', 'яйца', 'сахар'],
-    description:
-      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+    type: [RecipeProductInputDto],
+    description: 'Products from database with optional gram amounts',
   })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  customProducts?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => RecipeProductInputDto)
+  products?: RecipeProductInputDto[];
+
+  @ApiPropertyOptional({
+    type: [RecipeCustomProductInputDto],
+    example: [{ name: 'молоко', grams: 200 }, { name: 'яйца' }],
+    description: 'Custom product names with optional gram amounts, not linked to database products.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RecipeCustomProductInputDto)
+  customProducts?: RecipeCustomProductInputDto[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -570,25 +639,25 @@ export class UpdateRecipeDto {
   description?: string;
 
   @ApiPropertyOptional({
-    type: [Number],
-    example: [1, 2, 3],
-    description: 'Product IDs from database',
+    type: [RecipeProductInputDto],
+    description: 'Products from database with optional gram amounts',
   })
   @IsOptional()
   @IsArray()
-  @IsNumber({}, { each: true })
-  productIds?: number[];
+  @ValidateNested({ each: true })
+  @Type(() => RecipeProductInputDto)
+  products?: RecipeProductInputDto[];
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['молоко', 'яйца', 'сахар'],
-    description:
-      'Custom product names entered by user (arbitrary strings). These are stored as-is and not linked to database products.',
+    type: [RecipeCustomProductInputDto],
+    example: [{ name: 'молоко', grams: 200 }, { name: 'яйца' }],
+    description: 'Custom product names with optional gram amounts, not linked to database products.',
   })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  customProducts?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => RecipeCustomProductInputDto)
+  customProducts?: RecipeCustomProductInputDto[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -656,15 +725,14 @@ export class RecipeResponseDto {
   @ApiPropertyOptional({ example: 'A delicious pasta recipe', description: 'Recipe description' })
   description: string | null;
 
-  @ApiProperty({ type: [Number], example: [1, 2, 3], description: 'Product IDs' })
-  products: ProductResponseDto[];
+  @ApiProperty({ type: [RecipeProductResponseDto], description: 'Products with gram amounts' })
+  products: RecipeProductResponseDto[];
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['молоко', 'яйца', 'сахар'],
-    description: 'Custom product names entered by user (arbitrary strings)',
+    type: [RecipeCustomProductResponseDto],
+    description: 'Custom products with gram amounts',
   })
-  customProducts: string[];
+  customProducts: RecipeCustomProductResponseDto[];
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   isFluff: boolean | null;

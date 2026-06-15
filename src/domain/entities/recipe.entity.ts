@@ -42,6 +42,16 @@ export interface RecipeStepsConfig {
   steps: RecipeStep[];
 }
 
+export interface RecipeCustomProduct {
+  name: string;
+  grams?: number;
+}
+
+export interface RecipeProductGrams {
+  productId: number;
+  grams: number;
+}
+
 @Entity()
 export class Recipe {
   @PrimaryGeneratedColumn()
@@ -89,7 +99,10 @@ export class Recipe {
   products: Product[];
 
   @Column('jsonb', { nullable: true })
-  customProducts: string[] | null;
+  productGrams: RecipeProductGrams[] | null;
+
+  @Column('jsonb', { nullable: true })
+  customProducts: RecipeCustomProduct[] | null;
 
   @Column('boolean', { default: false, nullable: true })
   isFluff: boolean | null;

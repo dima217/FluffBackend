@@ -66,18 +66,16 @@ export class RecipeService implements IRecipeService {
       throw new NotFoundException(`RecipeType with ID ${createDto.recipeTypeId} not found`);
     }
 
-    // Validate that at least one of productIds or customProducts is provided
     if (
-      (!createDto.productIds || createDto.productIds.length === 0) &&
+      (!createDto.products || createDto.products.length === 0) &&
       (!createDto.customProducts || createDto.customProducts.length === 0)
     ) {
-      throw new BadRequestException('Either productIds or customProducts must be provided');
+      throw new BadRequestException('Either products or customProducts must be provided');
     }
 
-    // Fetch products from database if productIds are provided
     const products =
-      createDto.productIds && createDto.productIds.length > 0
-        ? await this.loadProductsByIds(createDto.productIds)
+      createDto.products && createDto.products.length > 0
+        ? await this.loadProductsByIds(createDto.products.map((p) => p.id))
         : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
@@ -97,23 +95,20 @@ export class RecipeService implements IRecipeService {
       throw new NotFoundException(`RecipeType with ID ${createDto.recipeTypeId} not found`);
     }
 
-    // Validate that at least one of productIds or customProducts is provided
     if (
-      (!createDto.productIds || createDto.productIds.length === 0) &&
+      (!createDto.products || createDto.products.length === 0) &&
       (!createDto.customProducts || createDto.customProducts.length === 0)
     ) {
-      throw new BadRequestException('Either productIds or customProducts must be provided');
+      throw new BadRequestException('Either products or customProducts must be provided');
     }
 
-    // Fetch products from database if productIds are provided
     const products =
-      createDto.productIds && createDto.productIds.length > 0
-        ? await this.loadProductsByIds(createDto.productIds)
+      createDto.products && createDto.products.length > 0
+        ? await this.loadProductsByIds(createDto.products.map((p) => p.id))
         : [];
 
     const user = userId ? await this.userRepository.findOne(userId) : null;
 
-    // Create recipe with placeholder image URLs and mediaIds
     const recipe = RecipeMapper.toEntityWithMediaIds(createDto, recipeType, products, user);
     return await this.recipeRepository.create(recipe);
   }
@@ -531,8 +526,12 @@ export class RecipeService implements IRecipeService {
       updateData.description = updateDto.description || null;
     }
 
-    if (updateDto.productIds !== undefined) {
-      updateData.products = await this.loadProductsByIds(updateDto.productIds);
+    if (updateDto.products !== undefined) {
+      updateData.products = await this.loadProductsByIds(updateDto.products.map((p) => p.id));
+      const grams = updateDto.products
+        .filter((p) => p.grams != null)
+        .map((p) => ({ productId: p.id, grams: p.grams! }));
+      updateData.productGrams = grams.length > 0 ? grams : null;
     }
 
     if (updateDto.customProducts !== undefined) {

@@ -1,18 +1,26 @@
-import { Recipe, type RecipeImageMediaIds } from '@domain/entities/recipe.entity';
+import { Recipe, type RecipeImageMediaIds, type RecipeProductGrams } from '@domain/entities/recipe.entity';
 import {
   CreateRecipeDto,
   CreateRecipeWithMediaIdsDto,
   UpdateRecipeDto,
   RecipeResponseDto,
   RecipeWithUserRating,
+  RecipeProductInputDto,
 } from '@application/dto/recipe.dto';
 import type { User } from '@domain/entities/user.entity';
 import type { RecipeType } from '@domain/entities/recipe-type.entity';
 import type { Product } from '@domain/entities/product.entity';
-import { ProductResponseDto } from '@application/dto';
 
 function hasUserRating(recipe: Recipe | RecipeWithUserRating): recipe is RecipeWithUserRating {
   return 'userRating' in recipe;
+}
+
+function buildProductGrams(products?: RecipeProductInputDto[]): RecipeProductGrams[] | null {
+  if (!products || products.length === 0) return null;
+  const result = products
+    .filter((p) => p.grams != null)
+    .map((p) => ({ productId: p.id, grams: p.grams! }));
+  return result.length > 0 ? result : null;
 }
 
 export class RecipeMapper {
@@ -32,6 +40,7 @@ export class RecipeMapper {
       promotionalVideo: createDto.promotionalVideo || null,
       description: createDto.description || null,
       products,
+      productGrams: buildProductGrams(createDto.products),
       customProducts:
         createDto.customProducts && createDto.customProducts.length > 0
           ? createDto.customProducts
@@ -51,25 +60,23 @@ export class RecipeMapper {
     products: Product[],
     user?: User | null,
   ): Recipe {
-    // Convert stepsConfig with mediaIds to format with placeholder URLs
     const stepsConfigWithPlaceholders = {
       steps: createDto.stepsConfig.steps.map((step) => ({
         name: step.name,
         description: step.description,
         resources: step.resources.map((resource) => ({
           position: resource.position,
-          source: `media:${resource.mediaId}`, // Placeholder format
+          source: `media:${resource.mediaId}`,
           type: resource.type,
         })),
       })),
     };
 
-    // Handle promotionalVideo: use mediaId if provided
     let promotionalVideo: string | null = null;
     let promotionalVideoMediaId: string | null = null;
 
     if (createDto.promotionalVideoMediaId) {
-      promotionalVideo = `media:${createDto.promotionalVideoMediaId}`; // Placeholder
+      promotionalVideo = `media:${createDto.promotionalVideoMediaId}`;
       promotionalVideoMediaId = createDto.promotionalVideoMediaId;
     }
 
@@ -79,8 +86,8 @@ export class RecipeMapper {
       type: recipeType,
       average: 0,
       image: {
-        cover: `media:${createDto.imageMediaIds.coverMediaId}`, // Placeholder
-        preview: `media:${createDto.imageMediaIds.previewMediaId}`, // Placeholder
+        cover: `media:${createDto.imageMediaIds.coverMediaId}`,
+        preview: `media:${createDto.imageMediaIds.previewMediaId}`,
       },
       imageMediaIds: {
         coverMediaId: createDto.imageMediaIds.coverMediaId,
@@ -90,6 +97,7 @@ export class RecipeMapper {
       promotionalVideoMediaId,
       description: createDto.description || null,
       products,
+      productGrams: buildProductGrams(createDto.products),
       customProducts:
         createDto.customProducts && createDto.customProducts.length > 0
           ? createDto.customProducts
@@ -107,6 +115,10 @@ export class RecipeMapper {
     recipe: Recipe | RecipeWithUserRating,
     favoriteIds?: Set<number>,
   ): RecipeResponseDto {
+    const productGramsMap = new Map<number, number>(
+      (recipe.productGrams || []).map((pg) => [pg.productId, pg.grams]),
+    );
+
     return {
       id: recipe.id,
       user: recipe.user
@@ -126,8 +138,20 @@ export class RecipeMapper {
       image: recipe.image,
       promotionalVideo: recipe.promotionalVideo,
       description: recipe.description,
-      products: recipe.products?.map((p) => p as unknown as ProductResponseDto) || [],
-      customProducts: recipe.customProducts || [],
+      products: (recipe.products || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        calories: Number(p.calories),
+        massa: Number(p.massa),
+        image: p.image ?? null,
+        countFavorites: p.countFavorites,
+        isFluff: p.isFluff,
+        createdAt: p.createdAt,
+        grams: productGramsMap.get(p.id),
+      })),
+      customProducts: (recipe.customProducts || []).map((cp) =>
+        typeof cp === 'string' ? { name: cp } : cp,
+      ),
       isFluff: recipe.isFluff,
       calories: Number(recipe.calories),
       cookAt: recipe.cookAt,
