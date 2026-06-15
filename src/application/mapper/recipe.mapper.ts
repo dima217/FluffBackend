@@ -19,7 +19,7 @@ function buildProductGrams(products?: RecipeProductInputDto[]): RecipeProductGra
   if (!products || products.length === 0) return null;
   const result = products
     .filter((p) => p.grams != null)
-    .map((p) => ({ productId: p.id, grams: p.grams! }));
+    .map((p) => ({ productId: p.id, grams: p.grams!, unit: p.unit }));
   return result.length > 0 ? result : null;
 }
 
@@ -138,17 +138,21 @@ export class RecipeMapper {
       image: recipe.image,
       promotionalVideo: recipe.promotionalVideo,
       description: recipe.description,
-      products: (recipe.products || []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        calories: Number(p.calories),
-        massa: Number(p.massa),
-        image: p.image ?? null,
-        countFavorites: p.countFavorites,
-        isFluff: p.isFluff,
-        createdAt: p.createdAt,
-        grams: productGramsMap.get(p.id),
-      })),
+      products: (recipe.products || []).map((p) => {
+        const pg = recipe.productGrams?.find((g) => g.productId === p.id);
+        return {
+          id: p.id,
+          name: p.name,
+          calories: Number(p.calories),
+          massa: Number(p.massa),
+          image: p.image ?? null,
+          countFavorites: p.countFavorites,
+          isFluff: p.isFluff,
+          createdAt: p.createdAt,
+          grams: pg?.grams,
+          unit: pg?.unit,
+        };
+      }),
       customProducts: (recipe.customProducts || []).map((cp) =>
         typeof cp === 'string' ? { name: cp } : cp,
       ),

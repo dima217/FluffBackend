@@ -149,11 +149,16 @@ export class RecipeProductInputDto {
   @IsNumber()
   id: number;
 
-  @ApiPropertyOptional({ example: 150, description: 'Amount in grams for this recipe' })
+  @ApiPropertyOptional({ example: 150, description: 'Quantity for this recipe' })
   @IsOptional()
   @IsNumber()
   @Min(0)
   grams?: number;
+
+  @ApiPropertyOptional({ example: 'г', description: 'Unit: г (grams) or шт (pieces)' })
+  @IsOptional()
+  @IsString()
+  unit?: string;
 }
 
 export class RecipeCustomProductInputDto {
@@ -162,11 +167,16 @@ export class RecipeCustomProductInputDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ example: 200, description: 'Amount in grams for this recipe' })
+  @ApiPropertyOptional({ example: 200, description: 'Quantity for this recipe' })
   @IsOptional()
   @IsNumber()
   @Min(0)
   grams?: number;
+
+  @ApiPropertyOptional({ example: 'г', description: 'Unit: г (grams) or шт (pieces)' })
+  @IsOptional()
+  @IsString()
+  unit?: string;
 }
 
 export class RecipeProductResponseDto {
@@ -194,16 +204,22 @@ export class RecipeProductResponseDto {
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Creation date' })
   createdAt: Date;
 
-  @ApiPropertyOptional({ example: 150, description: 'Amount in grams used in this recipe' })
+  @ApiPropertyOptional({ example: 150, description: 'Quantity used in this recipe' })
   grams?: number;
+
+  @ApiPropertyOptional({ example: 'г', description: 'Unit: г or шт' })
+  unit?: string;
 }
 
 export class RecipeCustomProductResponseDto {
   @ApiProperty({ example: 'молоко', description: 'Custom product name' })
   name: string;
 
-  @ApiPropertyOptional({ example: 200, description: 'Amount in grams' })
+  @ApiPropertyOptional({ example: 200, description: 'Quantity' })
   grams?: number;
+
+  @ApiPropertyOptional({ example: 'г', description: 'Unit: г or шт' })
+  unit?: string;
 }
 
 export class CreateRecipeWithMediaIdsDto {

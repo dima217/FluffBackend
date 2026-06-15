@@ -45,11 +45,13 @@ export interface RecipeStepsConfig {
 export interface RecipeCustomProduct {
   name: string;
   grams?: number;
+  unit?: string;
 }
 
 export interface RecipeProductGrams {
   productId: number;
   grams: number;
+  unit?: string;
 }
 
 @Entity()

@@ -530,7 +530,7 @@ export class RecipeService implements IRecipeService {
       updateData.products = await this.loadProductsByIds(updateDto.products.map((p) => p.id));
       const grams = updateDto.products
         .filter((p) => p.grams != null)
-        .map((p) => ({ productId: p.id, grams: p.grams! }));
+        .map((p) => ({ productId: p.id, grams: p.grams!, unit: p.unit }));
       updateData.productGrams = grams.length > 0 ? grams : null;
     }
 
