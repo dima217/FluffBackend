@@ -112,6 +112,15 @@ export class Recipe {
   @Column('decimal', { precision: 10, scale: 2 })
   calories: number;
 
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  proteins: number | null;
+
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  fats: number | null;
+
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  carbs: number | null;
+
   @Column('int')
   cookAt: number;
 

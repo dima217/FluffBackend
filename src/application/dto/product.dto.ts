@@ -70,6 +70,29 @@ export class CreateProductDto {
   @Type(() => ProductImageDto)
   image?: ProductImageDto;
 
+  @ApiPropertyOptional({ example: 'Сочный овощ, богатый витаминами', description: 'Product description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: 0.9, description: 'Proteins per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 0.2, description: 'Fats per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 3.9, description: 'Carbohydrates per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
+
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
   @Type(() => Boolean)
@@ -101,6 +124,29 @@ export class CreateProductWithMediaIdsDto {
   @ValidateNested()
   @Type(() => ProductImageMediaIdsDto)
   imageMediaIds: ProductImageMediaIdsDto;
+
+  @ApiPropertyOptional({ example: 'Сочный овощ, богатый витаминами', description: 'Product description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: 0.9, description: 'Proteins per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 0.2, description: 'Fats per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 3.9, description: 'Carbohydrates per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
@@ -154,6 +200,29 @@ export class UpdateProductDto {
   @Type(() => ProductImageDto)
   image?: ProductImageDto | null;
 
+  @ApiPropertyOptional({ example: 'Сочный овощ, богатый витаминами', description: 'Product description' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: 0.9, description: 'Proteins per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 0.2, description: 'Fats per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 3.9, description: 'Carbohydrates per 100g' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
+
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   @IsOptional()
   @Type(() => Boolean)
@@ -181,6 +250,18 @@ export class ProductResponseDto {
 
   @ApiProperty({ example: false, description: 'Whether the product is in user favorites' })
   favorite: boolean;
+
+  @ApiPropertyOptional({ description: 'Product description' })
+  description: string | null;
+
+  @ApiPropertyOptional({ example: 0.9, description: 'Proteins per 100g' })
+  proteins: number | null;
+
+  @ApiPropertyOptional({ example: 0.2, description: 'Fats per 100g' })
+  fats: number | null;
+
+  @ApiPropertyOptional({ example: 3.9, description: 'Carbohydrates per 100g' })
+  carbs: number | null;
 
   @ApiPropertyOptional({ example: '2024-12-31T23:59:59.000Z', description: 'Fluff date' })
   isFluff: Boolean;

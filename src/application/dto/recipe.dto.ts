@@ -756,6 +756,15 @@ export class RecipeResponseDto {
   @ApiProperty({ example: 500, description: 'Calories count' })
   calories: number;
 
+  @ApiPropertyOptional({ example: 42.5, description: 'Proteins (g), calculated from ingredients' })
+  proteins: number | null;
+
+  @ApiPropertyOptional({ example: 12.3, description: 'Fats (g), calculated from ingredients' })
+  fats: number | null;
+
+  @ApiPropertyOptional({ example: 58.0, description: 'Carbohydrates (g), calculated from ingredients' })
+  carbs: number | null;
+
   @ApiProperty({ example: 3600, description: 'Cooking time in seconds' })
   cookAt: number;
 

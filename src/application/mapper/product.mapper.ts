@@ -16,6 +16,10 @@ export class ProductMapper {
 			imageMediaIds: null,
 			isFluff: createDto.isFluff,
 			countFavorites: 0,
+			description: createDto.description ?? null,
+			proteins: createDto.proteins ?? null,
+			fats: createDto.fats ?? null,
+			carbs: createDto.carbs ?? null,
 		} as Product;
 	}
 
@@ -25,8 +29,8 @@ export class ProductMapper {
 			calories: createDto.calories,
 			massa: createDto.massa,
 			image: {
-				cover: `media:${createDto.imageMediaIds.coverMediaId}`, // Placeholder
-				preview: `media:${createDto.imageMediaIds.previewMediaId}`, // Placeholder
+				cover: `media:${createDto.imageMediaIds.coverMediaId}`,
+				preview: `media:${createDto.imageMediaIds.previewMediaId}`,
 			},
 			imageMediaIds: {
 				coverMediaId: createDto.imageMediaIds.coverMediaId,
@@ -34,6 +38,10 @@ export class ProductMapper {
 			} as ProductImageMediaIds,
 			isFluff: createDto.isFluff,
 			countFavorites: 0,
+			description: createDto.description ?? null,
+			proteins: createDto.proteins ?? null,
+			fats: createDto.fats ?? null,
+			carbs: createDto.carbs ?? null,
 		} as Product;
 	}
 
@@ -48,6 +56,10 @@ export class ProductMapper {
 			favorite: favoriteIds ? favoriteIds.has(product.id) : false,
 			isFluff: product.isFluff,
 			createdAt: product.createdAt,
+			description: product.description ?? null,
+			proteins: product.proteins != null ? Number(product.proteins) : null,
+			fats: product.fats != null ? Number(product.fats) : null,
+			carbs: product.carbs != null ? Number(product.carbs) : null,
 		};
 	}
 

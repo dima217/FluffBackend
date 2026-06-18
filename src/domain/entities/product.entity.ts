@@ -42,6 +42,18 @@ export class Product {
 	@Column('boolean', { default: false })
 	isFluff: boolean;
 
+	@Column('text', { nullable: true })
+	description: string | null;
+
+	@Column('decimal', { precision: 6, scale: 2, nullable: true })
+	proteins: number | null;
+
+	@Column('decimal', { precision: 6, scale: 2, nullable: true })
+	fats: number | null;
+
+	@Column('decimal', { precision: 6, scale: 2, nullable: true })
+	carbs: number | null;
+
 	@CreateDateColumn()
 	createdAt: Date;
 }

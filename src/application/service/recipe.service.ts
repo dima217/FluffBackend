@@ -14,6 +14,7 @@ import type { IProductRepository } from '@domain/interface/product.repository';
 import type { IUserRepository } from '@domain/interface/user.repository';
 import type { IFavoriteRepository } from '@domain/interface/favorite.repository';
 import { Recipe, type RecipeImage } from '@domain/entities/recipe.entity';
+import type { Product } from '@domain/entities/product.entity';
 import {
   CreateRecipeDto,
   CreateRecipeWithMediaIdsDto,
@@ -532,6 +533,12 @@ export class RecipeService implements IRecipeService {
         .filter((p) => p.grams != null)
         .map((p) => ({ productId: p.id, grams: p.grams!, unit: p.unit }));
       updateData.productGrams = grams.length > 0 ? grams : null;
+
+      // Recalculate nutritional values
+      const nutrition = this.calculateNutrition(updateData.products, updateData.productGrams ?? null);
+      updateData.proteins = nutrition.proteins;
+      updateData.fats = nutrition.fats;
+      updateData.carbs = nutrition.carbs;
     }
 
     if (updateDto.customProducts !== undefined) {
@@ -630,5 +637,26 @@ export class RecipeService implements IRecipeService {
   private async loadProductsByIds(productIds: Array<number | { id: number }>) {
     const ids = this.normalizeProductIds(productIds);
     return Promise.all(ids.map((id) => this.productRepository.findOne(id)));
+  }
+
+  private calculateNutrition(
+    products: Product[],
+    productGrams: Array<{ productId: number; grams: number }> | null,
+  ): { proteins: number; fats: number; carbs: number } {
+    const pgMap = new Map<number, number>((productGrams || []).map((pg) => [pg.productId, pg.grams]));
+    let proteins = 0;
+    let fats = 0;
+    let carbs = 0;
+    for (const p of products) {
+      const grams = pgMap.get(p.id) ?? 100;
+      if (p.proteins != null) proteins += (Number(p.proteins) / 100) * grams;
+      if (p.fats != null) fats += (Number(p.fats) / 100) * grams;
+      if (p.carbs != null) carbs += (Number(p.carbs) / 100) * grams;
+    }
+    return {
+      proteins: Math.round(proteins * 10) / 10,
+      fats: Math.round(fats * 10) / 10,
+      carbs: Math.round(carbs * 10) / 10,
+    };
   }
 }

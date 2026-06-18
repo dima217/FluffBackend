@@ -23,6 +23,28 @@ function buildProductGrams(products?: RecipeProductInputDto[]): RecipeProductGra
   return result.length > 0 ? result : null;
 }
 
+function calcRecipeNutrition(
+  products: Product[],
+  productGrams: RecipeProductGrams[] | null,
+): { proteins: number; fats: number; carbs: number } {
+  const pgMap = new Map<number, RecipeProductGrams>((productGrams || []).map((pg) => [pg.productId, pg]));
+  let proteins = 0;
+  let fats = 0;
+  let carbs = 0;
+  for (const p of products) {
+    const pg = pgMap.get(p.id);
+    const grams = pg?.grams ?? 100;
+    if (p.proteins != null) proteins += (Number(p.proteins) / 100) * grams;
+    if (p.fats != null) fats += (Number(p.fats) / 100) * grams;
+    if (p.carbs != null) carbs += (Number(p.carbs) / 100) * grams;
+  }
+  return {
+    proteins: Math.round(proteins * 10) / 10,
+    fats: Math.round(fats * 10) / 10,
+    carbs: Math.round(carbs * 10) / 10,
+  };
+}
+
 export class RecipeMapper {
   static toEntity(
     createDto: CreateRecipeDto,
@@ -47,6 +69,7 @@ export class RecipeMapper {
           : null,
       isFluff: createDto.isFluff || null,
       calories: createDto.calories,
+      ...calcRecipeNutrition(products, buildProductGrams(createDto.products)),
       cookAt: createDto.cookAt,
       stepsConfig: createDto.stepsConfig,
       makePublic: createDto.makePublic,
@@ -104,6 +127,7 @@ export class RecipeMapper {
           : null,
       isFluff: createDto.isFluff,
       calories: createDto.calories,
+      ...calcRecipeNutrition(products, buildProductGrams(createDto.products)),
       cookAt: createDto.cookAt,
       stepsConfig: stepsConfigWithPlaceholders,
       makePublic: createDto.makePublic,
@@ -158,6 +182,9 @@ export class RecipeMapper {
       ),
       isFluff: recipe.isFluff,
       calories: Number(recipe.calories),
+      proteins: recipe.proteins != null ? Number(recipe.proteins) : null,
+      fats: recipe.fats != null ? Number(recipe.fats) : null,
+      carbs: recipe.carbs != null ? Number(recipe.carbs) : null,
       cookAt: recipe.cookAt,
       stepsConfig: recipe.stepsConfig,
       createdAt: recipe.createdAt,
