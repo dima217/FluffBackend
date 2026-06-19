@@ -26,19 +26,23 @@ function buildProductGrams(products?: RecipeProductInputDto[]): RecipeProductGra
 function calcRecipeNutrition(
   products: Product[],
   productGrams: RecipeProductGrams[] | null,
-): { proteins: number; fats: number; carbs: number } {
+): { calories: number; proteins: number; fats: number; carbs: number } {
   const pgMap = new Map<number, RecipeProductGrams>((productGrams || []).map((pg) => [pg.productId, pg]));
+  let calories = 0;
   let proteins = 0;
   let fats = 0;
   let carbs = 0;
   for (const p of products) {
     const pg = pgMap.get(p.id);
     const grams = pg?.grams ?? 100;
-    if (p.proteins != null) proteins += (Number(p.proteins) / 100) * grams;
-    if (p.fats != null) fats += (Number(p.fats) / 100) * grams;
-    if (p.carbs != null) carbs += (Number(p.carbs) / 100) * grams;
+    const factor = grams / Number(p.massa || 100);
+    calories += Number(p.calories) * factor;
+    if (p.proteins != null) proteins += Number(p.proteins) * factor;
+    if (p.fats != null) fats += Number(p.fats) * factor;
+    if (p.carbs != null) carbs += Number(p.carbs) * factor;
   }
   return {
+    calories: Math.round(calories),
     proteins: Math.round(proteins * 10) / 10,
     fats: Math.round(fats * 10) / 10,
     carbs: Math.round(carbs * 10) / 10,
@@ -68,7 +72,6 @@ export class RecipeMapper {
           ? createDto.customProducts
           : null,
       isFluff: createDto.isFluff || null,
-      calories: createDto.calories,
       ...calcRecipeNutrition(products, buildProductGrams(createDto.products)),
       cookAt: createDto.cookAt,
       stepsConfig: createDto.stepsConfig,
@@ -126,7 +129,6 @@ export class RecipeMapper {
           ? createDto.customProducts
           : null,
       isFluff: createDto.isFluff,
-      calories: createDto.calories,
       ...calcRecipeNutrition(products, buildProductGrams(createDto.products)),
       cookAt: createDto.cookAt,
       stepsConfig: stepsConfigWithPlaceholders,

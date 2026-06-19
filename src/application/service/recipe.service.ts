@@ -534,8 +534,9 @@ export class RecipeService implements IRecipeService {
         .map((p) => ({ productId: p.id, grams: p.grams!, unit: p.unit }));
       updateData.productGrams = grams.length > 0 ? grams : null;
 
-      // Recalculate nutritional values
+      // Recalculate КБЖУ from products and grams
       const nutrition = this.calculateNutrition(updateData.products, updateData.productGrams ?? null);
+      updateData.calories = nutrition.calories;
       updateData.proteins = nutrition.proteins;
       updateData.fats = nutrition.fats;
       updateData.carbs = nutrition.carbs;
@@ -548,10 +549,6 @@ export class RecipeService implements IRecipeService {
 
     if (updateDto.isFluff !== undefined) {
       updateData.isFluff = updateDto.isFluff;
-    }
-
-    if (updateDto.calories !== undefined) {
-      updateData.calories = updateDto.calories;
     }
 
     if (updateDto.cookAt !== undefined) {
@@ -642,18 +639,22 @@ export class RecipeService implements IRecipeService {
   private calculateNutrition(
     products: Product[],
     productGrams: Array<{ productId: number; grams: number }> | null,
-  ): { proteins: number; fats: number; carbs: number } {
+  ): { calories: number; proteins: number; fats: number; carbs: number } {
     const pgMap = new Map<number, number>((productGrams || []).map((pg) => [pg.productId, pg.grams]));
+    let calories = 0;
     let proteins = 0;
     let fats = 0;
     let carbs = 0;
     for (const p of products) {
       const grams = pgMap.get(p.id) ?? 100;
-      if (p.proteins != null) proteins += (Number(p.proteins) / 100) * grams;
-      if (p.fats != null) fats += (Number(p.fats) / 100) * grams;
-      if (p.carbs != null) carbs += (Number(p.carbs) / 100) * grams;
+      const factor = grams / Number(p.massa || 100);
+      calories += Number(p.calories) * factor;
+      if (p.proteins != null) proteins += Number(p.proteins) * factor;
+      if (p.fats != null) fats += Number(p.fats) * factor;
+      if (p.carbs != null) carbs += Number(p.carbs) * factor;
     }
     return {
+      calories: Math.round(calories),
       proteins: Math.round(proteins * 10) / 10,
       fats: Math.round(fats * 10) / 10,
       carbs: Math.round(carbs * 10) / 10,

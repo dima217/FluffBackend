@@ -5,6 +5,7 @@ import * as path from 'path';
 import { Product } from '@domain/entities/product.entity';
 import { Recipe } from '@domain/entities/recipe.entity';
 import { RecipeType } from '@domain/entities/recipe-type.entity';
+import { RecipeRating } from '@domain/entities/recipe.rating.entity';
 import { User } from '@domain/entities/user.entity';
 import { Role } from '@domain/entities/role.entity';
 import type { RecipeImage, RecipeStepsConfig } from '@domain/entities/recipe.entity';
@@ -234,128 +235,128 @@ function getProductImageUrl(productName: string, type: 'cover' | 'preview' = 'co
 // Данные для продуктов
 const PRODUCTS_DATA = [
   // Овощи
-  { name: 'Помидор', calories: 18, massa: 100 },
-  { name: 'Огурец', calories: 16, massa: 100 },
-  { name: 'Морковь', calories: 41, massa: 100 },
-  { name: 'Лук репчатый', calories: 47, massa: 100 },
-  { name: 'Чеснок', calories: 149, massa: 100 },
-  { name: 'Капуста белокочанная', calories: 27, massa: 100 },
-  { name: 'Капуста цветная', calories: 30, massa: 100 },
-  { name: 'Брокколи', calories: 34, massa: 100 },
-  { name: 'Баклажан', calories: 24, massa: 100 },
-  { name: 'Кабачок', calories: 24, massa: 100 },
-  { name: 'Перец болгарский', calories: 27, massa: 100 },
-  { name: 'Свекла', calories: 43, massa: 100 },
-  { name: 'Картофель', calories: 77, massa: 100 },
-  { name: 'Тыква', calories: 26, massa: 100 },
-  { name: 'Шпинат', calories: 23, massa: 100 },
-  { name: 'Салат листовой', calories: 15, massa: 100 },
-  { name: 'Редис', calories: 20, massa: 100 },
-  { name: 'Редька', calories: 36, massa: 100 },
-  { name: 'Репа', calories: 30, massa: 100 },
-  { name: 'Кукуруза', calories: 86, massa: 100 },
-  { name: 'Горошек зеленый', calories: 81, massa: 100 },
-  { name: 'Фасоль стручковая', calories: 31, massa: 100 },
-  { name: 'Спаржа', calories: 20, massa: 100 },
-  { name: 'Артишок', calories: 47, massa: 100 },
-  { name: 'Цуккини', calories: 17, massa: 100 },
+  { name: 'Помидор', calories: 18, massa: 100, proteins: 0.9, fats: 0.2, carbs: 3.9 },
+  { name: 'Огурец', calories: 16, massa: 100, proteins: 0.7, fats: 0.1, carbs: 2.8 },
+  { name: 'Морковь', calories: 41, massa: 100, proteins: 1.3, fats: 0.1, carbs: 9.6 },
+  { name: 'Лук репчатый', calories: 47, massa: 100, proteins: 1.4, fats: 0.2, carbs: 10.4 },
+  { name: 'Чеснок', calories: 149, massa: 100, proteins: 6.4, fats: 0.5, carbs: 29.9 },
+  { name: 'Капуста белокочанная', calories: 27, massa: 100, proteins: 1.8, fats: 0.1, carbs: 4.7 },
+  { name: 'Капуста цветная', calories: 30, massa: 100, proteins: 2.5, fats: 0.3, carbs: 5.4 },
+  { name: 'Брокколи', calories: 34, massa: 100, proteins: 2.8, fats: 0.4, carbs: 6.6 },
+  { name: 'Баклажан', calories: 24, massa: 100, proteins: 1.2, fats: 0.1, carbs: 5.9 },
+  { name: 'Кабачок', calories: 24, massa: 100, proteins: 0.6, fats: 0.3, carbs: 4.6 },
+  { name: 'Перец болгарский', calories: 27, massa: 100, proteins: 1.3, fats: 0.1, carbs: 5.7 },
+  { name: 'Свекла', calories: 43, massa: 100, proteins: 1.5, fats: 0.1, carbs: 11.8 },
+  { name: 'Картофель', calories: 77, massa: 100, proteins: 2.0, fats: 0.4, carbs: 16.3 },
+  { name: 'Тыква', calories: 26, massa: 100, proteins: 1.0, fats: 0.1, carbs: 6.5 },
+  { name: 'Шпинат', calories: 23, massa: 100, proteins: 2.9, fats: 0.4, carbs: 3.6 },
+  { name: 'Салат листовой', calories: 15, massa: 100, proteins: 1.3, fats: 0.2, carbs: 2.1 },
+  { name: 'Редис', calories: 20, massa: 100, proteins: 1.2, fats: 0.1, carbs: 3.4 },
+  { name: 'Редька', calories: 36, massa: 100, proteins: 1.9, fats: 0.2, carbs: 6.7 },
+  { name: 'Репа', calories: 30, massa: 100, proteins: 1.5, fats: 0.1, carbs: 6.4 },
+  { name: 'Кукуруза', calories: 86, massa: 100, proteins: 3.3, fats: 1.2, carbs: 18.7 },
+  { name: 'Горошек зеленый', calories: 81, massa: 100, proteins: 5.4, fats: 0.4, carbs: 14.5 },
+  { name: 'Фасоль стручковая', calories: 31, massa: 100, proteins: 2.0, fats: 0.2, carbs: 5.9 },
+  { name: 'Спаржа', calories: 20, massa: 100, proteins: 2.2, fats: 0.1, carbs: 3.9 },
+  { name: 'Артишок', calories: 47, massa: 100, proteins: 3.3, fats: 0.2, carbs: 10.5 },
+  { name: 'Цуккини', calories: 17, massa: 100, proteins: 1.2, fats: 0.3, carbs: 2.7 },
 
   // Фрукты
-  { name: 'Яблоко', calories: 52, massa: 100 },
-  { name: 'Банан', calories: 89, massa: 100 },
-  { name: 'Апельсин', calories: 47, massa: 100 },
-  { name: 'Грейпфрут', calories: 42, massa: 100 },
-  { name: 'Лимон', calories: 29, massa: 100 },
-  { name: 'Мандарин', calories: 53, massa: 100 },
-  { name: 'Груша', calories: 57, massa: 100 },
-  { name: 'Персик', calories: 39, massa: 100 },
-  { name: 'Абрикос', calories: 48, massa: 100 },
-  { name: 'Слива', calories: 46, massa: 100 },
-  { name: 'Вишня', calories: 52, massa: 100 },
-  { name: 'Черешня', calories: 50, massa: 100 },
-  { name: 'Клубника', calories: 32, massa: 100 },
-  { name: 'Малина', calories: 52, massa: 100 },
-  { name: 'Черника', calories: 57, massa: 100 },
-  { name: 'Виноград', calories: 69, massa: 100 },
-  { name: 'Арбуз', calories: 30, massa: 100 },
-  { name: 'Дыня', calories: 34, massa: 100 },
-  { name: 'Ананас', calories: 50, massa: 100 },
-  { name: 'Манго', calories: 60, massa: 100 },
-  { name: 'Киви', calories: 61, massa: 100 },
-  { name: 'Гранат', calories: 83, massa: 100 },
+  { name: 'Яблоко', calories: 52, massa: 100, proteins: 0.3, fats: 0.2, carbs: 13.8 },
+  { name: 'Банан', calories: 89, massa: 100, proteins: 1.1, fats: 0.2, carbs: 22.8 },
+  { name: 'Апельсин', calories: 47, massa: 100, proteins: 0.9, fats: 0.2, carbs: 11.8 },
+  { name: 'Грейпфрут', calories: 42, massa: 100, proteins: 0.8, fats: 0.2, carbs: 10.7 },
+  { name: 'Лимон', calories: 29, massa: 100, proteins: 1.1, fats: 0.3, carbs: 9.3 },
+  { name: 'Мандарин', calories: 53, massa: 100, proteins: 0.8, fats: 0.2, carbs: 13.3 },
+  { name: 'Груша', calories: 57, massa: 100, proteins: 0.4, fats: 0.3, carbs: 15.5 },
+  { name: 'Персик', calories: 39, massa: 100, proteins: 0.9, fats: 0.1, carbs: 9.5 },
+  { name: 'Абрикос', calories: 48, massa: 100, proteins: 1.4, fats: 0.1, carbs: 11.1 },
+  { name: 'Слива', calories: 46, massa: 100, proteins: 0.8, fats: 0.3, carbs: 11.4 },
+  { name: 'Вишня', calories: 52, massa: 100, proteins: 1.1, fats: 0.4, carbs: 12.2 },
+  { name: 'Черешня', calories: 50, massa: 100, proteins: 1.2, fats: 0.5, carbs: 11.3 },
+  { name: 'Клубника', calories: 32, massa: 100, proteins: 0.7, fats: 0.3, carbs: 7.7 },
+  { name: 'Малина', calories: 52, massa: 100, proteins: 1.2, fats: 0.6, carbs: 11.9 },
+  { name: 'Черника', calories: 57, massa: 100, proteins: 1.1, fats: 0.4, carbs: 14.5 },
+  { name: 'Виноград', calories: 69, massa: 100, proteins: 0.6, fats: 0.2, carbs: 17.1 },
+  { name: 'Арбуз', calories: 30, massa: 100, proteins: 0.6, fats: 0.1, carbs: 7.6 },
+  { name: 'Дыня', calories: 34, massa: 100, proteins: 0.8, fats: 0.2, carbs: 8.7 },
+  { name: 'Ананас', calories: 50, massa: 100, proteins: 0.5, fats: 0.1, carbs: 13.1 },
+  { name: 'Манго', calories: 60, massa: 100, proteins: 0.8, fats: 0.4, carbs: 15.0 },
+  { name: 'Киви', calories: 61, massa: 100, proteins: 1.1, fats: 0.5, carbs: 15.3 },
+  { name: 'Гранат', calories: 83, massa: 100, proteins: 1.7, fats: 0.7, carbs: 18.7 },
 
   // Мясо и птица
-  { name: 'Куриная грудка', calories: 165, massa: 100 },
-  { name: 'Куриное бедро', calories: 209, massa: 100 },
-  { name: 'Индейка грудка', calories: 135, massa: 100 },
-  { name: 'Говядина', calories: 250, massa: 100 },
-  { name: 'Свинина', calories: 242, massa: 100 },
-  { name: 'Баранина', calories: 294, massa: 100 },
-  { name: 'Телятина', calories: 172, massa: 100 },
-  { name: 'Кролик', calories: 183, massa: 100 },
-  { name: 'Печень куриная', calories: 136, massa: 100 },
-  { name: 'Печень говяжья', calories: 127, massa: 100 },
+  { name: 'Куриная грудка', calories: 165, massa: 100, proteins: 31.0, fats: 3.6, carbs: 0.0 },
+  { name: 'Куриное бедро', calories: 209, massa: 100, proteins: 18.7, fats: 15.3, carbs: 0.0 },
+  { name: 'Индейка грудка', calories: 135, massa: 100, proteins: 29.9, fats: 1.0, carbs: 0.0 },
+  { name: 'Говядина', calories: 250, massa: 100, proteins: 18.9, fats: 16.0, carbs: 0.0 },
+  { name: 'Свинина', calories: 242, massa: 100, proteins: 16.4, fats: 21.5, carbs: 0.0 },
+  { name: 'Баранина', calories: 294, massa: 100, proteins: 15.6, fats: 22.0, carbs: 0.0 },
+  { name: 'Телятина', calories: 172, massa: 100, proteins: 19.7, fats: 1.2, carbs: 0.0 },
+  { name: 'Кролик', calories: 183, massa: 100, proteins: 21.0, fats: 8.0, carbs: 0.0 },
+  { name: 'Печень куриная', calories: 136, massa: 100, proteins: 20.4, fats: 5.9, carbs: 0.7 },
+  { name: 'Печень говяжья', calories: 127, massa: 100, proteins: 17.9, fats: 3.7, carbs: 3.0 },
 
   // Рыба и морепродукты
-  { name: 'Лосось', calories: 208, massa: 100 },
-  { name: 'Тунец', calories: 144, massa: 100 },
-  { name: 'Треска', calories: 82, massa: 100 },
-  { name: 'Креветки', calories: 99, massa: 100 },
-  { name: 'Кальмар', calories: 92, massa: 100 },
-  { name: 'Мидии', calories: 77, massa: 100 },
-  { name: 'Устрицы', calories: 81, massa: 100 },
-  { name: 'Краб', calories: 87, massa: 100 },
-  { name: 'Сельдь', calories: 161, massa: 100 },
-  { name: 'Скумбрия', calories: 191, massa: 100 },
+  { name: 'Лосось', calories: 208, massa: 100, proteins: 20.0, fats: 13.0, carbs: 0.0 },
+  { name: 'Тунец', calories: 144, massa: 100, proteins: 23.0, fats: 4.9, carbs: 0.0 },
+  { name: 'Треска', calories: 82, massa: 100, proteins: 17.5, fats: 0.6, carbs: 0.0 },
+  { name: 'Креветки', calories: 99, massa: 100, proteins: 18.9, fats: 2.2, carbs: 0.0 },
+  { name: 'Кальмар', calories: 92, massa: 100, proteins: 18.0, fats: 2.2, carbs: 2.0 },
+  { name: 'Мидии', calories: 77, massa: 100, proteins: 11.9, fats: 2.2, carbs: 3.3 },
+  { name: 'Устрицы', calories: 81, massa: 100, proteins: 9.0, fats: 2.0, carbs: 4.9 },
+  { name: 'Краб', calories: 87, massa: 100, proteins: 16.0, fats: 1.8, carbs: 0.0 },
+  { name: 'Сельдь', calories: 161, massa: 100, proteins: 17.7, fats: 11.4, carbs: 0.0 },
+  { name: 'Скумбрия', calories: 191, massa: 100, proteins: 18.0, fats: 13.2, carbs: 0.0 },
 
   // Молочные продукты
-  { name: 'Молоко 3.2%', calories: 64, massa: 100 },
-  { name: 'Молоко обезжиренное', calories: 31, massa: 100 },
-  { name: 'Творог 5%', calories: 121, massa: 100 },
-  { name: 'Творог обезжиренный', calories: 88, massa: 100 },
-  { name: 'Сыр твердый', calories: 363, massa: 100 },
-  { name: 'Сыр моцарелла', calories: 280, massa: 100 },
-  { name: 'Сыр фета', calories: 264, massa: 100 },
-  { name: 'Йогурт натуральный', calories: 59, massa: 100 },
-  { name: 'Сметана 20%', calories: 206, massa: 100 },
-  { name: 'Сливки 33%', calories: 322, massa: 100 },
-  { name: 'Масло сливочное', calories: 748, massa: 100 },
-  { name: 'Кефир', calories: 41, massa: 100 },
+  { name: 'Молоко 3.2%', calories: 64, massa: 100, proteins: 2.9, fats: 3.2, carbs: 4.7 },
+  { name: 'Молоко обезжиренное', calories: 31, massa: 100, proteins: 3.0, fats: 0.1, carbs: 4.7 },
+  { name: 'Творог 5%', calories: 121, massa: 100, proteins: 17.2, fats: 5.0, carbs: 1.8 },
+  { name: 'Творог обезжиренный', calories: 88, massa: 100, proteins: 16.5, fats: 0.5, carbs: 2.8 },
+  { name: 'Сыр твердый', calories: 363, massa: 100, proteins: 26.0, fats: 29.0, carbs: 0.4 },
+  { name: 'Сыр моцарелла', calories: 280, massa: 100, proteins: 22.2, fats: 22.4, carbs: 0.6 },
+  { name: 'Сыр фета', calories: 264, massa: 100, proteins: 14.2, fats: 21.3, carbs: 4.1 },
+  { name: 'Йогурт натуральный', calories: 59, massa: 100, proteins: 5.0, fats: 3.2, carbs: 3.5 },
+  { name: 'Сметана 20%', calories: 206, massa: 100, proteins: 3.4, fats: 20.0, carbs: 3.4 },
+  { name: 'Сливки 33%', calories: 322, massa: 100, proteins: 2.7, fats: 33.0, carbs: 3.4 },
+  { name: 'Масло сливочное', calories: 748, massa: 100, proteins: 0.8, fats: 82.5, carbs: 0.5 },
+  { name: 'Кефир', calories: 41, massa: 100, proteins: 3.4, fats: 1.0, carbs: 4.0 },
 
   // Крупы и зерновые
-  { name: 'Рис белый', calories: 365, massa: 100 },
-  { name: 'Рис бурый', calories: 337, massa: 100 },
-  { name: 'Гречка', calories: 343, massa: 100 },
-  { name: 'Овсянка', calories: 389, massa: 100 },
-  { name: 'Пшено', calories: 378, massa: 100 },
-  { name: 'Перловка', calories: 315, massa: 100 },
-  { name: 'Булгур', calories: 342, massa: 100 },
-  { name: 'Киноа', calories: 368, massa: 100 },
-  { name: 'Макароны', calories: 371, massa: 100 },
-  { name: 'Хлеб белый', calories: 266, massa: 100 },
-  { name: 'Хлеб ржаной', calories: 259, massa: 100 },
-  { name: 'Хлеб цельнозерновой', calories: 247, massa: 100 },
+  { name: 'Рис белый', calories: 365, massa: 100, proteins: 7.3, fats: 0.7, carbs: 78.9 },
+  { name: 'Рис бурый', calories: 337, massa: 100, proteins: 7.4, fats: 1.8, carbs: 72.9 },
+  { name: 'Гречка', calories: 343, massa: 100, proteins: 12.6, fats: 3.3, carbs: 62.1 },
+  { name: 'Овсянка', calories: 389, massa: 100, proteins: 13.0, fats: 6.2, carbs: 67.0 },
+  { name: 'Пшено', calories: 378, massa: 100, proteins: 11.5, fats: 3.3, carbs: 69.3 },
+  { name: 'Перловка', calories: 315, massa: 100, proteins: 9.3, fats: 1.1, carbs: 66.9 },
+  { name: 'Булгур', calories: 342, massa: 100, proteins: 12.3, fats: 1.3, carbs: 75.9 },
+  { name: 'Киноа', calories: 368, massa: 100, proteins: 14.1, fats: 6.1, carbs: 64.2 },
+  { name: 'Макароны', calories: 371, massa: 100, proteins: 10.9, fats: 1.3, carbs: 74.2 },
+  { name: 'Хлеб белый', calories: 266, massa: 100, proteins: 7.8, fats: 2.4, carbs: 53.4 },
+  { name: 'Хлеб ржаной', calories: 259, massa: 100, proteins: 8.5, fats: 3.3, carbs: 46.9 },
+  { name: 'Хлеб цельнозерновой', calories: 247, massa: 100, proteins: 9.0, fats: 3.1, carbs: 46.8 },
 
   // Орехи и семена
-  { name: 'Миндаль', calories: 579, massa: 100 },
-  { name: 'Грецкий орех', calories: 654, massa: 100 },
-  { name: 'Арахис', calories: 567, massa: 100 },
-  { name: 'Кешью', calories: 553, massa: 100 },
-  { name: 'Фисташки', calories: 560, massa: 100 },
-  { name: 'Семена подсолнечника', calories: 584, massa: 100 },
-  { name: 'Семена льна', calories: 534, massa: 100 },
-  { name: 'Семена чиа', calories: 486, massa: 100 },
+  { name: 'Миндаль', calories: 579, massa: 100, proteins: 21.2, fats: 49.9, carbs: 21.6 },
+  { name: 'Грецкий орех', calories: 654, massa: 100, proteins: 15.2, fats: 65.2, carbs: 13.7 },
+  { name: 'Арахис', calories: 567, massa: 100, proteins: 25.8, fats: 49.2, carbs: 16.1 },
+  { name: 'Кешью', calories: 553, massa: 100, proteins: 18.2, fats: 43.9, carbs: 30.2 },
+  { name: 'Фисташки', calories: 560, massa: 100, proteins: 20.2, fats: 45.4, carbs: 27.2 },
+  { name: 'Семена подсолнечника', calories: 584, massa: 100, proteins: 20.7, fats: 52.9, carbs: 10.5 },
+  { name: 'Семена льна', calories: 534, massa: 100, proteins: 18.3, fats: 42.2, carbs: 28.9 },
+  { name: 'Семена чиа', calories: 486, massa: 100, proteins: 16.5, fats: 30.7, carbs: 42.1 },
 
   // Масла и жиры
-  { name: 'Масло подсолнечное', calories: 884, massa: 100 },
-  { name: 'Масло оливковое', calories: 884, massa: 100 },
-  { name: 'Масло кокосовое', calories: 862, massa: 100 },
-  { name: 'Масло льняное', calories: 884, massa: 100 },
+  { name: 'Масло подсолнечное', calories: 884, massa: 100, proteins: 0.0, fats: 99.9, carbs: 0.0 },
+  { name: 'Масло оливковое', calories: 884, massa: 100, proteins: 0.0, fats: 99.8, carbs: 0.0 },
+  { name: 'Масло кокосовое', calories: 862, massa: 100, proteins: 0.0, fats: 99.1, carbs: 0.0 },
+  { name: 'Масло льняное', calories: 884, massa: 100, proteins: 0.0, fats: 99.8, carbs: 0.0 },
 
   // Яйца
-  { name: 'Яйцо куриное', calories: 157, massa: 100 },
-  { name: 'Яичный белок', calories: 52, massa: 100 },
-  { name: 'Яичный желток', calories: 322, massa: 100 },
+  { name: 'Яйцо куриное', calories: 157, massa: 100, proteins: 12.7, fats: 10.9, carbs: 0.7 },
+  { name: 'Яичный белок', calories: 52, massa: 100, proteins: 10.8, fats: 0.2, carbs: 0.7 },
+  { name: 'Яичный желток', calories: 322, massa: 100, proteins: 16.2, fats: 26.3, carbs: 0.6 },
 ];
 
 // Данные для типов рецептов
@@ -377,10 +378,16 @@ const RECIPES_DATA = [
   {
     name: 'Омлет с овощами',
     type: 'Завтрак',
-    calories: 250,
     cookAt: 900,
     description: 'Сытный и полезный завтрак с овощами',
     products: ['Яйцо куриное', 'Помидор', 'Перец болгарский', 'Лук репчатый', 'Масло оливковое'],
+    productGrams: [
+      { productName: 'Яйцо куриное', grams: 180 },
+      { productName: 'Помидор', grams: 80 },
+      { productName: 'Перец болгарский', grams: 60 },
+      { productName: 'Лук репчатый', grams: 40 },
+      { productName: 'Масло оливковое', grams: 10 },
+    ],
     steps: [
       { name: 'Подготовка овощей', description: 'Нарежьте помидоры, перец и лук мелкими кубиками' },
       { name: 'Взбивание яиц', description: 'Взбейте яйца с солью и перцем' },
@@ -394,10 +401,16 @@ const RECIPES_DATA = [
   {
     name: 'Салат Цезарь',
     type: 'Салат',
-    calories: 320,
     cookAt: 600,
     description: 'Классический салат с курицей и соусом',
     products: ['Куриная грудка', 'Салат листовой', 'Сыр твердый', 'Хлеб белый', 'Масло оливковое'],
+    productGrams: [
+      { productName: 'Куриная грудка', grams: 150 },
+      { productName: 'Салат листовой', grams: 100 },
+      { productName: 'Сыр твердый', grams: 30 },
+      { productName: 'Хлеб белый', grams: 40 },
+      { productName: 'Масло оливковое', grams: 15 },
+    ],
     steps: [
       { name: 'Приготовление курицы', description: 'Обжарьте куриную грудку до готовности' },
       { name: 'Подготовка салата', description: 'Промойте и порвите листья салата' },
@@ -408,10 +421,15 @@ const RECIPES_DATA = [
   {
     name: 'Паста Карбонара',
     type: 'Обед',
-    calories: 580,
     cookAt: 1200,
     description: 'Итальянская паста с беконом и сыром',
     products: ['Макароны', 'Яйцо куриное', 'Сыр твердый', 'Масло сливочное'],
+    productGrams: [
+      { productName: 'Макароны', grams: 200 },
+      { productName: 'Яйцо куриное', grams: 100 },
+      { productName: 'Сыр твердый', grams: 50 },
+      { productName: 'Масло сливочное', grams: 20 },
+    ],
     steps: [
       {
         name: 'Варка пасты',
@@ -425,10 +443,16 @@ const RECIPES_DATA = [
   {
     name: 'Куриный суп',
     type: 'Супы',
-    calories: 180,
     cookAt: 2400,
     description: 'Наваристый куриный суп с овощами',
-    products: ['Куриная грудка', 'Морковь', 'Лук репчатый', 'Картофель', 'Лапша'],
+    products: ['Куриная грудка', 'Морковь', 'Лук репчатый', 'Картофель', 'Макароны'],
+    productGrams: [
+      { productName: 'Куриная грудка', grams: 200 },
+      { productName: 'Морковь', grams: 80 },
+      { productName: 'Лук репчатый', grams: 60 },
+      { productName: 'Картофель', grams: 150 },
+      { productName: 'Макароны', grams: 60 },
+    ],
     steps: [
       {
         name: 'Приготовление бульона',
@@ -436,13 +460,12 @@ const RECIPES_DATA = [
       },
       { name: 'Подготовка овощей', description: 'Нарежьте овощи кубиками' },
       { name: 'Добавление овощей', description: 'Добавьте овощи в бульон и варите 15 минут' },
-      { name: 'Добавление лапши', description: 'Добавьте лапшу и варите еще 5-7 минут' },
+      { name: 'Добавление макарон', description: 'Добавьте макароны и варите еще 5-7 минут' },
     ],
   },
   {
     name: 'Греческий салат',
     type: 'Салат',
-    calories: 220,
     cookAt: 600,
     description: 'Свежий салат с фетой и оливками',
     products: [
@@ -452,6 +475,14 @@ const RECIPES_DATA = [
       'Сыр фета',
       'Масло оливковое',
       'Лук репчатый',
+    ],
+    productGrams: [
+      { productName: 'Помидор', grams: 150 },
+      { productName: 'Огурец', grams: 100 },
+      { productName: 'Перец болгарский', grams: 80 },
+      { productName: 'Сыр фета', grams: 60 },
+      { productName: 'Масло оливковое', grams: 20 },
+      { productName: 'Лук репчатый', grams: 50 },
     ],
     steps: [
       { name: 'Нарезка овощей', description: 'Нарежьте все овощи крупными кубиками' },
@@ -463,10 +494,15 @@ const RECIPES_DATA = [
   {
     name: 'Лосось на пару',
     type: 'Ужин',
-    calories: 280,
     cookAt: 900,
     description: 'Нежный лосось с овощами на пару',
     products: ['Лосось', 'Брокколи', 'Морковь', 'Лимон'],
+    productGrams: [
+      { productName: 'Лосось', grams: 200 },
+      { productName: 'Брокколи', grams: 120 },
+      { productName: 'Морковь', grams: 80 },
+      { productName: 'Лимон', grams: 30 },
+    ],
     steps: [
       { name: 'Подготовка рыбы', description: 'Нарежьте лосось порционными кусками' },
       { name: 'Подготовка овощей', description: 'Нарежьте овощи для гарнира' },
@@ -477,10 +513,14 @@ const RECIPES_DATA = [
   {
     name: 'Творожная запеканка',
     type: 'Завтрак',
-    calories: 240,
     cookAt: 1800,
     description: 'Нежная творожная запеканка',
-    products: ['Творог 5%', 'Яйцо куриное', 'Сметана 20%', 'Мука'],
+    products: ['Творог 5%', 'Яйцо куриное', 'Сметана 20%'],
+    productGrams: [
+      { productName: 'Творог 5%', grams: 400 },
+      { productName: 'Яйцо куриное', grams: 120 },
+      { productName: 'Сметана 20%', grams: 60 },
+    ],
     steps: [
       { name: 'Подготовка теста', description: 'Смешайте творог с яйцами и сметаной' },
       { name: 'Добавление муки', description: 'Добавьте муку и перемешайте до однородности' },
@@ -491,7 +531,6 @@ const RECIPES_DATA = [
   {
     name: 'Борщ',
     type: 'Супы',
-    calories: 95,
     cookAt: 3600,
     description: 'Традиционный украинский борщ',
     products: [
@@ -501,6 +540,14 @@ const RECIPES_DATA = [
       'Лук репчатый',
       'Картофель',
       'Говядина',
+    ],
+    productGrams: [
+      { productName: 'Свекла', grams: 150 },
+      { productName: 'Капуста белокочанная', grams: 200 },
+      { productName: 'Морковь', grams: 80 },
+      { productName: 'Лук репчатый', grams: 60 },
+      { productName: 'Картофель', grams: 200 },
+      { productName: 'Говядина', grams: 300 },
     ],
     steps: [
       { name: 'Приготовление бульона', description: 'Сварите мясной бульон' },
@@ -515,10 +562,14 @@ const RECIPES_DATA = [
   {
     name: 'Стейк из говядины',
     type: 'Ужин',
-    calories: 350,
     cookAt: 1200,
     description: 'Сочный стейк средней прожарки',
-    products: ['Говядина', 'Масло сливочное', 'Чеснок', 'Розмарин'],
+    products: ['Говядина', 'Масло сливочное', 'Чеснок'],
+    productGrams: [
+      { productName: 'Говядина', grams: 300 },
+      { productName: 'Масло сливочное', grams: 20 },
+      { productName: 'Чеснок', grams: 10 },
+    ],
     steps: [
       { name: 'Подготовка мяса', description: 'Доведите мясо до комнатной температуры' },
       { name: 'Обжарка', description: 'Обжарьте стейк по 3-4 минуты с каждой стороны' },
@@ -529,10 +580,16 @@ const RECIPES_DATA = [
   {
     name: 'Смузи из ягод',
     type: 'Смузи',
-    calories: 120,
     cookAt: 300,
     description: 'Освежающий ягодный смузи',
     products: ['Клубника', 'Малина', 'Черника', 'Банан', 'Йогурт натуральный'],
+    productGrams: [
+      { productName: 'Клубника', grams: 100 },
+      { productName: 'Малина', grams: 80 },
+      { productName: 'Черника', grams: 80 },
+      { productName: 'Банан', grams: 120 },
+      { productName: 'Йогурт натуральный', grams: 150 },
+    ],
     steps: [
       { name: 'Подготовка фруктов', description: 'Промойте ягоды и очистите банан' },
       { name: 'Смешивание', description: 'Смешайте все ингредиенты в блендере' },
@@ -545,12 +602,38 @@ const RECIPES_DATA = [
 type RecipeData = {
   name: string;
   type: string;
-  calories: number;
   cookAt: number;
   description: string;
   products: string[];
+  productGrams: Array<{ productName: string; grams: number }>;
   steps: Array<{ name: string; description: string }>;
 };
+
+// Вычисление КБЖУ рецепта из граммовки ингредиентов
+function computeNutrition(
+  productGramsData: Array<{ productName: string; grams: number }>,
+  productsMap: Map<string, Product>,
+): { calories: number; proteins: number; fats: number; carbs: number } {
+  let calories = 0;
+  let proteins = 0;
+  let fats = 0;
+  let carbs = 0;
+  for (const pg of productGramsData) {
+    const product = productsMap.get(pg.productName);
+    if (!product) continue;
+    const factor = pg.grams / Number(product.massa || 100);
+    calories += Number(product.calories) * factor;
+    if (product.proteins != null) proteins += Number(product.proteins) * factor;
+    if (product.fats != null) fats += Number(product.fats) * factor;
+    if (product.carbs != null) carbs += Number(product.carbs) * factor;
+  }
+  return {
+    calories: Math.round(calories),
+    proteins: Math.round(proteins * 10) / 10,
+    fats: Math.round(fats * 10) / 10,
+    carbs: Math.round(carbs * 10) / 10,
+  };
+}
 
 // Генерация дополнительных рецептов
 function generateAdditionalRecipes(): RecipeData[] {
@@ -608,7 +691,6 @@ function generateAdditionalRecipes(): RecipeData[] {
   for (let i = 0; i < 40; i++) {
     const name = recipeNames[i] || `Рецепт ${i + 1}`;
     const type = types[Math.floor(Math.random() * types.length)];
-    const calories = Math.floor(Math.random() * 500) + 150;
     const cookAt = Math.floor(Math.random() * 2400) + 600;
     const productCount = Math.floor(Math.random() * 5) + 3;
     const selectedProducts: string[] = [];
@@ -631,10 +713,10 @@ function generateAdditionalRecipes(): RecipeData[] {
     additionalRecipes.push({
       name,
       type,
-      calories,
       cookAt,
       description: `Вкусный рецепт ${name.toLowerCase()}`,
       products: selectedProducts,
+      productGrams: selectedProducts.map((productName) => ({ productName, grams: 100 })),
       steps,
     });
   }
@@ -673,7 +755,7 @@ async function seedDatabase() {
     username: dbConfig.username,
     password: dbConfig.password,
     database: dbConfig.database,
-    entities: [Product, Recipe, RecipeType, User, Role],
+    entities: [Product, Recipe, RecipeType, RecipeRating, User, Role],
     synchronize: false,
     logging: false,
   });
@@ -722,6 +804,9 @@ async function seedDatabase() {
           name: productData.name,
           calories: productData.calories,
           massa: productData.massa,
+          proteins: productData.proteins,
+          fats: productData.fats,
+          carbs: productData.carbs,
           image: productImage,
           imageMediaIds: null,
           countFavorites: 0,
@@ -730,6 +815,11 @@ async function seedDatabase() {
         product = await productRepository.save(product);
         createdProducts++;
       } else {
+        // Обновляем КБЖУ существующего продукта если не заполнено
+        product.proteins = productData.proteins;
+        product.fats = productData.fats;
+        product.carbs = productData.carbs;
+        product = await productRepository.save(product);
         existingProducts++;
       }
       productsMap.set(productData.name, product);
@@ -737,16 +827,16 @@ async function seedDatabase() {
 
     // Дополнительные продукты до 100+
     const additionalProducts = [
-      { name: 'Грибы шампиньоны', calories: 27, massa: 100 },
-      { name: 'Грибы белые', calories: 34, massa: 100 },
-      { name: 'Имбирь', calories: 80, massa: 100 },
-      { name: 'Корица', calories: 247, massa: 100 },
-      { name: 'Куркума', calories: 354, massa: 100 },
-      { name: 'Паприка', calories: 282, massa: 100 },
-      { name: 'Базилик', calories: 22, massa: 100 },
-      { name: 'Петрушка', calories: 36, massa: 100 },
-      { name: 'Укроп', calories: 40, massa: 100 },
-      { name: 'Кинза', calories: 23, massa: 100 },
+      { name: 'Грибы шампиньоны', calories: 27, massa: 100, proteins: 4.3, fats: 1.0, carbs: 0.1 },
+      { name: 'Грибы белые', calories: 34, massa: 100, proteins: 3.7, fats: 1.7, carbs: 1.1 },
+      { name: 'Имбирь', calories: 80, massa: 100, proteins: 1.8, fats: 0.8, carbs: 15.8 },
+      { name: 'Корица', calories: 247, massa: 100, proteins: 3.9, fats: 1.2, carbs: 80.6 },
+      { name: 'Куркума', calories: 354, massa: 100, proteins: 7.8, fats: 9.9, carbs: 69.4 },
+      { name: 'Паприка', calories: 282, massa: 100, proteins: 14.1, fats: 12.9, carbs: 54.0 },
+      { name: 'Базилик', calories: 22, massa: 100, proteins: 3.2, fats: 0.6, carbs: 2.7 },
+      { name: 'Петрушка', calories: 36, massa: 100, proteins: 3.7, fats: 0.4, carbs: 7.6 },
+      { name: 'Укроп', calories: 40, massa: 100, proteins: 2.5, fats: 0.5, carbs: 6.3 },
+      { name: 'Кинза', calories: 23, massa: 100, proteins: 2.1, fats: 0.5, carbs: 3.7 },
     ];
 
     for (const productData of additionalProducts) {
@@ -763,6 +853,9 @@ async function seedDatabase() {
           name: productData.name,
           calories: productData.calories,
           massa: productData.massa,
+          proteins: productData.proteins,
+          fats: productData.fats,
+          carbs: productData.carbs,
           image: productImage,
           imageMediaIds: null,
           countFavorites: 0,
@@ -770,6 +863,11 @@ async function seedDatabase() {
         });
         product = await productRepository.save(product);
         createdProducts++;
+      } else {
+        product.proteins = productData.proteins;
+        product.fats = productData.fats;
+        product.carbs = productData.carbs;
+        await productRepository.save(product);
       }
       productsMap.set(productData.name, product);
     }
@@ -791,6 +889,23 @@ async function seedDatabase() {
       });
 
       if (existingRecipe) {
+        // Обновляем КБЖУ и граммовки для уже существующих рецептов
+        const recipeProductGrams = (recipeData.productGrams || [])
+          .map((pg) => {
+            const product = productsMap.get(pg.productName);
+            if (!product) return null;
+            return { productId: product.id, grams: pg.grams };
+          })
+          .filter((pg): pg is { productId: number; grams: number } => pg !== null);
+
+        const nutrition = computeNutrition(recipeData.productGrams || [], productsMap);
+
+        existingRecipe.productGrams = recipeProductGrams.length > 0 ? recipeProductGrams : null;
+        existingRecipe.calories = nutrition.calories;
+        existingRecipe.proteins = nutrition.proteins;
+        existingRecipe.fats = nutrition.fats;
+        existingRecipe.carbs = nutrition.carbs;
+        await recipeRepository.save(existingRecipe);
         existingRecipes++;
         continue;
       }
@@ -932,6 +1047,17 @@ async function seedDatabase() {
         })),
       };
 
+      // Вычисляем КБЖУ из граммовки
+      const recipeProductGrams = (recipeData.productGrams || [])
+        .map((pg) => {
+          const product = productsMap.get(pg.productName);
+          if (!product) return null;
+          return { productId: product.id, grams: pg.grams };
+        })
+        .filter((pg): pg is { productId: number; grams: number } => pg !== null);
+
+      const nutrition = computeNutrition(recipeData.productGrams || [], productsMap);
+
       // Создание рецепта
       const recipe = recipeRepository.create({
         user: null,
@@ -945,15 +1071,21 @@ async function seedDatabase() {
         promotionalVideoMediaId: null,
         description: recipeData.description,
         products: recipeProducts,
+        productGrams: recipeProductGrams.length > 0 ? recipeProductGrams : null,
         isFluff: false,
-        calories: recipeData.calories,
+        calories: nutrition.calories,
+        proteins: nutrition.proteins,
+        fats: nutrition.fats,
+        carbs: nutrition.carbs,
         cookAt: recipeData.cookAt,
         stepsConfig,
       });
 
       await recipeRepository.save(recipe);
       createdRecipes++;
-      console.log(`  ✓ ${recipeData.name} (${recipeData.type})`);
+      console.log(
+        `  ✓ ${recipeData.name} (${recipeData.type}) — ${nutrition.calories} ккал, Б${nutrition.proteins}г Ж${nutrition.fats}г У${nutrition.carbs}г`,
+      );
     }
 
     console.log(`\n✓ Создано новых рецептов: ${createdRecipes}`);
