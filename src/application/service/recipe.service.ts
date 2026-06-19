@@ -534,8 +534,12 @@ export class RecipeService implements IRecipeService {
         .map((p) => ({ productId: p.id, grams: p.grams!, unit: p.unit }));
       updateData.productGrams = grams.length > 0 ? grams : null;
 
-      // Recalculate КБЖУ from products and grams
-      const nutrition = this.calculateNutrition(updateData.products, updateData.productGrams ?? null);
+      const pendingCustomProducts = updateDto.customProducts ?? existingRecipe.customProducts ?? [];
+      const nutrition = this.calculateNutrition(
+        updateData.products,
+        updateData.productGrams ?? null,
+        pendingCustomProducts,
+      );
       updateData.calories = nutrition.calories;
       updateData.proteins = nutrition.proteins;
       updateData.fats = nutrition.fats;
@@ -545,6 +549,21 @@ export class RecipeService implements IRecipeService {
     if (updateDto.customProducts !== undefined) {
       updateData.customProducts =
         updateDto.customProducts.length > 0 ? updateDto.customProducts : null;
+
+      // Recalculate if products were not already updated above
+      if (updateDto.products === undefined) {
+        const currentProducts = existingRecipe.products ?? [];
+        const currentProductGrams = existingRecipe.productGrams ?? null;
+        const nutrition = this.calculateNutrition(
+          currentProducts,
+          currentProductGrams,
+          updateData.customProducts ?? [],
+        );
+        updateData.calories = nutrition.calories;
+        updateData.proteins = nutrition.proteins;
+        updateData.fats = nutrition.fats;
+        updateData.carbs = nutrition.carbs;
+      }
     }
 
     if (updateDto.isFluff !== undefined) {
@@ -639,6 +658,7 @@ export class RecipeService implements IRecipeService {
   private calculateNutrition(
     products: Product[],
     productGrams: Array<{ productId: number; grams: number }> | null,
+    customProducts?: Array<{ calories?: number; proteins?: number; fats?: number; carbs?: number }> | null,
   ): { calories: number; proteins: number; fats: number; carbs: number } {
     const pgMap = new Map<number, number>((productGrams || []).map((pg) => [pg.productId, pg.grams]));
     let calories = 0;
@@ -652,6 +672,12 @@ export class RecipeService implements IRecipeService {
       if (p.proteins != null) proteins += Number(p.proteins) * factor;
       if (p.fats != null) fats += Number(p.fats) * factor;
       if (p.carbs != null) carbs += Number(p.carbs) * factor;
+    }
+    for (const cp of customProducts ?? []) {
+      if (cp.calories != null) calories += cp.calories;
+      if (cp.proteins != null) proteins += cp.proteins;
+      if (cp.fats != null) fats += cp.fats;
+      if (cp.carbs != null) carbs += cp.carbs;
     }
     return {
       calories: Math.round(calories),

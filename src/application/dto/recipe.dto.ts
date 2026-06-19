@@ -177,6 +177,30 @@ export class RecipeCustomProductInputDto {
   @IsOptional()
   @IsString()
   unit?: string;
+
+  @ApiPropertyOptional({ example: 120, description: 'Total calories for the specified amount' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  calories?: number;
+
+  @ApiPropertyOptional({ example: 5.2, description: 'Total proteins (g) for the specified amount' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 3.1, description: 'Total fats (g) for the specified amount' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 15.0, description: 'Total carbs (g) for the specified amount' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
 }
 
 export class RecipeProductResponseDto {
@@ -220,6 +244,18 @@ export class RecipeCustomProductResponseDto {
 
   @ApiPropertyOptional({ example: 'г', description: 'Unit: г or шт' })
   unit?: string;
+
+  @ApiPropertyOptional({ example: 120, description: 'Total calories for the specified amount' })
+  calories?: number;
+
+  @ApiPropertyOptional({ example: 5.2, description: 'Total proteins (g) for the specified amount' })
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 3.1, description: 'Total fats (g) for the specified amount' })
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 15.0, description: 'Total carbs (g) for the specified amount' })
+  carbs?: number;
 }
 
 export class CreateRecipeWithMediaIdsDto {
