@@ -42,6 +42,34 @@ export class CreateTrackingDto {
   recipeId?: number;
 
   @ApiPropertyOptional({
+    example: 300,
+    description:
+      'Portion size in grams. When provided together with recipeId, calories and macros will be scaled proportionally to the recipe total weight.',
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  grams?: number;
+
+  @ApiPropertyOptional({ example: 25.5, description: 'Proteins (g). For manual entries only.' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 10.0, description: 'Fats (g). For manual entries only.' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 60.0, description: 'Carbohydrates (g). For manual entries only.' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
+
+  @ApiPropertyOptional({
     example: '2024-01-15T12:30:00.000Z',
     description:
       'When the meal was consumed (ISO 8601). If omitted, the current time is used.',
@@ -65,6 +93,24 @@ export class UpdateTrackingDto {
   @Min(0.01)
   calories?: number;
 
+  @ApiPropertyOptional({ example: 25.5, description: 'Proteins (g)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  proteins?: number;
+
+  @ApiPropertyOptional({ example: 10.0, description: 'Fats (g)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fats?: number;
+
+  @ApiPropertyOptional({ example: 60.0, description: 'Carbohydrates (g)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
+
   @ApiPropertyOptional({
     example: '2024-01-15T12:30:00.000Z',
     description: 'When the meal was consumed (ISO 8601)',
@@ -84,6 +130,15 @@ export class TrackingResponseDto {
 
   @ApiProperty({ example: 500, description: 'Calories' })
   calories: number;
+
+  @ApiPropertyOptional({ example: 25.5, description: 'Proteins (g)' })
+  proteins?: number | null;
+
+  @ApiPropertyOptional({ example: 10.0, description: 'Fats (g)' })
+  fats?: number | null;
+
+  @ApiPropertyOptional({ example: 60.0, description: 'Carbohydrates (g)' })
+  carbs?: number | null;
 
   @ApiPropertyOptional({
     example: 1,

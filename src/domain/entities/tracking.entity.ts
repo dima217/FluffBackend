@@ -34,6 +34,15 @@ export class Tracking {
   @JoinColumn({ name: 'recipe_id' })
   recipe: Recipe | null;
 
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  proteins: number | null;
+
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  fats: number | null;
+
+  @Column('decimal', { precision: 8, scale: 2, nullable: true })
+  carbs: number | null;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created: Date;
 }

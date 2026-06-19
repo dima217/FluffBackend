@@ -82,7 +82,15 @@ export class TrackingService implements ITrackingService {
       }
     }
 
-    const tracking = TrackingMapper.toEntity(createDto, user, recipe || null);
+    let scaledNutrition: { calories: number; proteins: number | null; fats: number | null; carbs: number | null } | undefined;
+    if (recipe && createDto.grams != null) {
+      scaledNutrition = TrackingMapper.scaleRecipeNutrition(recipe, createDto.grams);
+      this.logger.log(
+        `Scaling recipe nutrition for ${createDto.grams}g: ${JSON.stringify(scaledNutrition)}`,
+      );
+    }
+
+    const tracking = TrackingMapper.toEntity(createDto, user, recipe || null, scaledNutrition);
     const created = await this.trackingRepository.create(tracking);
     await this.invalidateStatisticsCache();
     return created;
@@ -145,6 +153,15 @@ export class TrackingService implements ITrackingService {
     }
     if (updateDto.calories !== undefined) {
       updateData.calories = updateDto.calories;
+    }
+    if (updateDto.proteins !== undefined) {
+      updateData.proteins = updateDto.proteins;
+    }
+    if (updateDto.fats !== undefined) {
+      updateData.fats = updateDto.fats;
+    }
+    if (updateDto.carbs !== undefined) {
+      updateData.carbs = updateDto.carbs;
     }
     if (updateDto.created !== undefined) {
       updateData.created = new Date(updateDto.created);
