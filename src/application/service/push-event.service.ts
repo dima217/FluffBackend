@@ -29,20 +29,34 @@ export class PushEventsService implements IPushEventsService {
   ): Promise<void> {
     if (userIds.length === 0) return;
     const type = data.type ?? PushNotificationType.GENERIC;
-    await this.notificationService.createMany(
-      userIds.map((userId) => ({
-        userId,
-        type,
-        title,
-        body,
-        data: { ...data, type },
-      })),
-    );
 
-    if (!this.fcmService.isEnabled) return;
+    try {
+      await this.notificationService.createMany(
+        userIds.map((userId) => ({
+          userId,
+          type,
+          title,
+          body,
+          data: { ...data, type },
+        })),
+      );
+    } catch (e) {
+      this.logger.warn(
+        `Failed to persist in-app notifications: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+
+    if (!this.fcmService.isEnabled) {
+      this.logger.warn(`FCM disabled — push not delivered to ${userIds.length} user(s)`);
+      return;
+    }
+
     const users = await this.userRepository.findByIds(userIds);
     const tokens = users.map((u) => u.fcmToken).filter((t): t is string => !!t?.trim());
-    if (tokens.length === 0) return;
+    if (tokens.length === 0) {
+      this.logger.warn(`No FCM tokens for user(s) ${userIds.join(', ')}`);
+      return;
+    }
     await this.fcmService.sendToTokens(tokens, title, body, { ...data, type });
   }
 

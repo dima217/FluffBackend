@@ -883,28 +883,44 @@ async function seedDatabase() {
     let existingRecipes = 0;
 
     for (const recipeData of allRecipes) {
-      // Проверка существования рецепта
+      // Проверка существования рецепта — грузим с реляцией products
       const existingRecipe = await recipeRepository.findOne({
         where: { name: recipeData.name },
+        relations: ['products'],
       });
 
       if (existingRecipe) {
-        // Обновляем КБЖУ и граммовки для уже существующих рецептов
-        const recipeProductGrams = (recipeData.productGrams || [])
-          .map((pg) => {
-            const product = productsMap.get(pg.productName);
-            if (!product) return null;
-            return { productId: product.id, grams: pg.grams };
-          })
-          .filter((pg): pg is { productId: number; grams: number } => pg !== null);
+        // Строим граммовки только по продуктам, фактически привязанным к рецепту
+        // через таблицу recipe_products.
+        // Если продукт есть в seed-данных productGrams, берём его граммовку;
+        // иначе ставим 100г по умолчанию.
+        const linkedProducts: Product[] = existingRecipe.products ?? [];
+        const seedGramsMap = new Map<string, number>(
+          (recipeData.productGrams || []).map((pg) => [pg.productName, pg.grams]),
+        );
 
-        const nutrition = computeNutrition(recipeData.productGrams || [], productsMap);
+        const recipeProductGrams = linkedProducts
+          .map((p) => ({
+            productId: p.id,
+            grams: seedGramsMap.get(p.name) ?? 100,
+          }));
+
+        // Для расчёта КБЖУ используем реальные продукты (объекты) + граммовки
+        let calories = 0, proteins = 0, fats = 0, carbs = 0;
+        for (const p of linkedProducts) {
+          const grams = seedGramsMap.get(p.name) ?? 100;
+          const factor = grams / Number(p.massa || 100);
+          calories += Number(p.calories) * factor;
+          if (p.proteins != null) proteins += Number(p.proteins) * factor;
+          if (p.fats != null) fats += Number(p.fats) * factor;
+          if (p.carbs != null) carbs += Number(p.carbs) * factor;
+        }
 
         existingRecipe.productGrams = recipeProductGrams.length > 0 ? recipeProductGrams : null;
-        existingRecipe.calories = nutrition.calories;
-        existingRecipe.proteins = nutrition.proteins;
-        existingRecipe.fats = nutrition.fats;
-        existingRecipe.carbs = nutrition.carbs;
+        existingRecipe.calories = Math.round(calories);
+        existingRecipe.proteins = Math.round(proteins * 10) / 10;
+        existingRecipe.fats = Math.round(fats * 10) / 10;
+        existingRecipe.carbs = Math.round(carbs * 10) / 10;
         await recipeRepository.save(existingRecipe);
         existingRecipes++;
         continue;
