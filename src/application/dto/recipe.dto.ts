@@ -734,6 +734,19 @@ export class UpdateRecipeDto {
   @ValidateNested()
   @Type(() => RecipeStepsConfigDto)
   stepsConfig?: RecipeStepsConfigDto;
+
+  @ApiPropertyOptional({ example: true, description: 'Make recipe public for searching' })
+  @IsOptional()
+  @IsBoolean()
+  makePublic?: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Request to submit recipe for others users recommendations',
+  })
+  @IsOptional()
+  @IsBoolean()
+  submitToSystem?: boolean | null;
 }
 
 export class RecipeResponseDto {
@@ -806,6 +819,15 @@ export class RecipeResponseDto {
 
   @ApiProperty({ type: RecipeStepsConfigDto, description: 'Recipe steps configuration' })
   stepsConfig: RecipeStepsConfigDto;
+
+  @ApiProperty({ example: true, description: 'Make recipe public for searching' })
+  makePublic: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Request to submit recipe for others users recommendations',
+  })
+  submitToSystem: boolean | null;
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z', description: 'Creation date' })
   createdAt: Date;

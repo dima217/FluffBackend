@@ -584,6 +584,14 @@ export class RecipeService implements IRecipeService {
       updateData.stepsConfig = updateDto.stepsConfig;
     }
 
+    if (updateDto.makePublic !== undefined) {
+      updateData.makePublic = updateDto.makePublic;
+    }
+
+    if (updateDto.submitToSystem !== undefined) {
+      updateData.submitToSystem = updateDto.submitToSystem ?? (null as unknown as boolean);
+    }
+
     const updated = await this.recipeRepository.update(id, updateData);
     await this.achievementService.onRecipeUpdated(userId, updated);
     return updated;

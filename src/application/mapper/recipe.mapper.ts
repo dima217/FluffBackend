@@ -196,6 +196,8 @@ export class RecipeMapper {
       carbs: recipe.carbs != null ? Number(recipe.carbs) : null,
       cookAt: recipe.cookAt,
       stepsConfig: recipe.stepsConfig,
+      makePublic: recipe.makePublic,
+      submitToSystem: recipe.submitToSystem,
       createdAt: recipe.createdAt,
       updatedAt: recipe.updatedAt,
       userRating: hasUserRating(recipe) ? recipe.userRating : null,
