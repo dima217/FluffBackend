@@ -1,7 +1,8 @@
 import { OAuthDto } from '@application/dto/oauth.dto';
 import { JwtTokensDto } from '@application/dto/user.dto';
 import { OAuthStrategy } from '@application/interface/oauth.strategy';
-import { Injectable, Inject, Logger, UnauthorizedException, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import type { IUserRepository } from '@domain/interface/user.repository';
@@ -42,8 +43,7 @@ export class GoogleStrategy extends OAuthStrategy {
 
     private readonly auditLogService: AuditLogService,
 
-    @Inject(forwardRef(() => AchievementService))
-    private readonly achievementService: AchievementService,
+    private readonly moduleRef: ModuleRef,
 
     private readonly configService: ConfigService<AppConfig>,
   ) {
@@ -155,6 +155,20 @@ export class GoogleStrategy extends OAuthStrategy {
     }
   }
 
+  private unlockAccountAchievement(userId: number): void {
+    void (async () => {
+      try {
+        const achievementService = this.moduleRef.get(AchievementService, { strict: false });
+        if (!achievementService) return;
+        await achievementService.onAccountCreated(userId);
+      } catch (error) {
+        this.logger.error(
+          `Failed to unlock account achievement: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    })();
+  }
+
   private async authenticateExistingUser(user: UserEntity): Promise<JwtTokensDto> {
     // Create refresh token
     const [refreshToken, expiresAt] = this.userDomainService.createRefreshToken(user);
@@ -257,11 +271,7 @@ export class GoogleStrategy extends OAuthStrategy {
         );
       });
 
-      this.achievementService.onAccountCreated(userSaved.id).catch((error) => {
-        this.logger.error(
-          `Failed to unlock account achievement: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      });
+      this.unlockAccountAchievement(userSaved.id);
 
       return userSaved;
     } catch (error) {

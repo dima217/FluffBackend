@@ -1,4 +1,4 @@
-import { forwardRef, Module } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { OAuthService } from "./oauth.service";
 import { GoogleStrategy } from "./google.strategy";
 import { OAuthStrategyFactory } from "./strategy.factory";
@@ -8,11 +8,8 @@ import { NotificationRegistrationObservable } from "@application/service/observa
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import type { AppConfig } from "@config";
-import { ApplicationModule } from "@application/application.module";
-
 @Module({
 	imports: [
-		forwardRef(() => ApplicationModule),
 		JwtModule.registerAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService<AppConfig>) => {
