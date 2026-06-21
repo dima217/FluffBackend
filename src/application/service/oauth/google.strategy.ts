@@ -1,7 +1,7 @@
 import { OAuthDto } from '@application/dto/oauth.dto';
 import { JwtTokensDto } from '@application/dto/user.dto';
 import { OAuthStrategy } from '@application/interface/oauth.strategy';
-import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject, Logger, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import type { IUserRepository } from '@domain/interface/user.repository';
@@ -17,6 +17,7 @@ import { AuditContext } from '@application/dto/audit-context.dto';
 import { randomBytes } from 'crypto';
 import type { AppConfig } from '@config';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
+import { AchievementService } from '@application/service/achievement.service';
 
 @Injectable()
 export class GoogleStrategy extends OAuthStrategy {
@@ -40,6 +41,9 @@ export class GoogleStrategy extends OAuthStrategy {
     private readonly notificationRegistrationObservable: NotificationRegistrationObservable,
 
     private readonly auditLogService: AuditLogService,
+
+    @Inject(forwardRef(() => AchievementService))
+    private readonly achievementService: AchievementService,
 
     private readonly configService: ConfigService<AppConfig>,
   ) {
@@ -250,6 +254,12 @@ export class GoogleStrategy extends OAuthStrategy {
       this.notificationRegistrationObservable.accept(userSaved).catch((error) => {
         this.logger.error(
           `Failed to send registration notification: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
+
+      this.achievementService.onAccountCreated(userSaved.id).catch((error) => {
+        this.logger.error(
+          `Failed to unlock account achievement: ${error instanceof Error ? error.message : String(error)}`,
         );
       });
 

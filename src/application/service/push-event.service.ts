@@ -8,6 +8,7 @@ import {
   PushNotificationContent,
   PushNotificationType,
   buildSupportTicketReplyData,
+  buildAchievementUnlockedData,
 } from '@application/constants/push-notification.types';
 
 @Injectable()
@@ -88,6 +89,22 @@ export class PushEventsService implements IPushEventsService {
         title,
         body,
         buildSupportTicketReplyData(ticketId, subject, status),
+      );
+    });
+  }
+
+  async notifyAchievementUnlocked(
+    userId: number,
+    achievementCode: string,
+    title: string,
+    body: string,
+  ): Promise<void> {
+    await this.safe(async () => {
+      await this.sendToUserIds(
+        [userId],
+        title,
+        body,
+        buildAchievementUnlockedData(achievementCode),
       );
     });
   }

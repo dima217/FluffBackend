@@ -17,6 +17,8 @@ import { Notification } from '@domain/entities';
 import { SupportTicket } from '@domain/entities/support-ticket.entity';
 import { SupportMessage } from '@domain/entities/support-message.entity';
 import { RecipeRating } from '@domain/entities/recipe.rating.entity';
+import { Achievement } from '@domain/entities/achievement.entity';
+import { UserAchievement } from '@domain/entities/user-achievement.entity';
 
 export const databaseProviders = [
   {
@@ -47,6 +49,8 @@ export const databaseProviders = [
           Review,
           Favorite,
           RecipeRating,
+          Achievement,
+          UserAchievement,
         ],
         synchronize: false,
         logging: appConfig?.nodeEnv === 'development',

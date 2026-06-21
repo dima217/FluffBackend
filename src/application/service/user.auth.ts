@@ -35,6 +35,7 @@ import { UserMapper, ProfileMapper, TokenMapper, AuditLogMapper } from '@applica
 import { NotificationRegistrationObservable } from './observable/notification.service';
 import { PasswordChangeNotificationObservable } from './observable/password-change-notification.service';
 import { REPOSITORY_CONSTANTS, PROVIDER_CONSTANTS } from '@domain/interface/constant';
+import { AchievementService } from './achievement.service';
 
 @Injectable()
 export class UserAuthService implements IUserAuthService {
@@ -63,6 +64,8 @@ export class UserAuthService implements IUserAuthService {
     private readonly notificationRegistrationObservable: NotificationRegistrationObservable,
 
     private readonly passwordChangeNotificationObservable: PasswordChangeNotificationObservable,
+
+    private readonly achievementService: AchievementService,
   ) {}
   async recoveryInit(username: string): Promise<void> {
     this.logger.log(`Recovery init requested for username: ${username}`);
@@ -339,6 +342,12 @@ export class UserAuthService implements IUserAuthService {
     this.notificationRegistrationObservable.accept(userSaved).catch((error) => {
       this.logger.error(
         `Failed to send registration notification: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
+
+    this.achievementService.onAccountCreated(userSaved.id).catch((error) => {
+      this.logger.error(
+        `Failed to process signup achievement: ${error instanceof Error ? error.message : String(error)}`,
       );
     });
 

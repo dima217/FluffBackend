@@ -24,6 +24,7 @@ import { notificarionRepository } from './provider/repository/notification.provi
 import { supportRepository } from './provider/repository/support.provider';
 import { supportMessageRepository } from './provider/repository/support-message.provider';
 import { ratingRepository } from './provider/repository/rating.provider';
+import { achievementRepository } from './provider/repository/achievement.provider';
 
 @Global()
 @Module({
@@ -39,6 +40,7 @@ import { ratingRepository } from './provider/repository/rating.provider';
     ...trackingRepository,
     ...notificarionRepository,
     ...ratingRepository,
+    ...achievementRepository,
     ...productRepository,
     ...recipeTypeRepository,
     ...recipeRepository,
@@ -68,6 +70,7 @@ import { ratingRepository } from './provider/repository/rating.provider';
     ...auditLogRepository,
     ...notificarionRepository,
     ...ratingRepository,
+    ...achievementRepository,
     ...trackingRepository,
     ...productRepository,
     ...recipeTypeRepository,

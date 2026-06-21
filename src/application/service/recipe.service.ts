@@ -34,6 +34,7 @@ import { RecipeMapper } from '@application/mapper/recipe.mapper';
 import { RelatedEntityType } from '@domain/enums/related-entity-type.enum';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { MediaService } from '@application/service/media.service';
+import { AchievementService } from '@application/service/achievement.service';
 import type { AppConfig } from '@config';
 import { RecipeRating } from '@domain/entities/recipe.rating.entity';
 import type { IRecipeRatingRepository } from '@domain/interface/rating.repository';
@@ -57,6 +58,7 @@ export class RecipeService implements IRecipeService {
     private readonly ratingRepository: IRecipeRatingRepository,
     private readonly mediaService: MediaService,
     private readonly configService: ConfigService<AppConfig>,
+    private readonly achievementService: AchievementService,
   ) {}
 
   async create(userId: number | null, createDto: CreateRecipeDto): Promise<Recipe> {
@@ -82,7 +84,9 @@ export class RecipeService implements IRecipeService {
     const user = userId ? await this.userRepository.findOne(userId) : null;
 
     const recipe = RecipeMapper.toEntity(createDto, recipeType, products, user);
-    return await this.recipeRepository.create(recipe);
+    const saved = await this.recipeRepository.create(recipe);
+    await this.achievementService.onRecipeCreated(userId, saved);
+    return saved;
   }
 
   async createWithMediaIds(
@@ -111,7 +115,9 @@ export class RecipeService implements IRecipeService {
     const user = userId ? await this.userRepository.findOne(userId) : null;
 
     const recipe = RecipeMapper.toEntityWithMediaIds(createDto, recipeType, products, user);
-    return await this.recipeRepository.create(recipe);
+    const saved = await this.recipeRepository.create(recipe);
+    await this.achievementService.onRecipeCreated(userId, saved);
+    return saved;
   }
 
   async confirmUpload(
@@ -578,7 +584,9 @@ export class RecipeService implements IRecipeService {
       updateData.stepsConfig = updateDto.stepsConfig;
     }
 
-    return await this.recipeRepository.update(id, updateData);
+    const updated = await this.recipeRepository.update(id, updateData);
+    await this.achievementService.onRecipeUpdated(userId, updated);
+    return updated;
   }
 
   async delete(id: number, userId: number | null): Promise<void> {
@@ -625,6 +633,7 @@ export class RecipeService implements IRecipeService {
       rating.value = value;
 
       await this.ratingRepository.create(rating);
+      await this.achievementService.onRecipeRated(userId, true);
     }
 
     const average = await this.ratingRepository.getAverage(id);

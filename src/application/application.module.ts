@@ -26,12 +26,13 @@ import { NotificationService } from './service/notification.service';
 import { PushEventsService } from './service/push-event.service';
 import { TrackingReminderCronService } from './service/tracking-reminder-cron.service';
 import { SupportService } from './service/support.service';
+import { AchievementService } from './service/achievement.service';
 import { AppWebSocketGateway } from './gateway/support.gatewat';
 
 @Module({
   imports: [
     InfrastructureModule,
-    OAuthModule,
+    forwardRef(() => OAuthModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService<AppConfig>) => {
@@ -68,6 +69,7 @@ import { AppWebSocketGateway } from './gateway/support.gatewat';
     ProductFavoriteCountProcess,
     SupportService,
     AppWebSocketGateway,
+    AchievementService,
     {
       provide: FavoriteProcessManager,
       useFactory: (
@@ -102,6 +104,7 @@ import { AppWebSocketGateway } from './gateway/support.gatewat';
     NotificationService,
     SupportService,
     AppWebSocketGateway,
+    AchievementService,
   ],
 })
 export class ApplicationModule {}

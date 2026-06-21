@@ -2,6 +2,7 @@ export const PushNotificationType = {
   GENERIC: 'generic',
   TRACKING_REMINDER: 'tracking_reminder',
   SUPPORT_TICKET_REPLY: 'support_ticket_reply',
+  ACHIEVEMENT_UNLOCKED: 'achievement_unlocked',
 } as const;
 
 export type PushNotificationTypeValue =
@@ -61,4 +62,11 @@ export const buildSupportTicketReplyData = (
   ticketId: pushDataString(ticketId),
   subject: pushDataString(subject),
   status: pushDataString(status),
+});
+
+export const buildAchievementUnlockedData = (
+  achievementCode: string,
+): Record<string, string> => ({
+  type: PushNotificationType.ACHIEVEMENT_UNLOCKED,
+  achievementCode: pushDataString(achievementCode),
 });

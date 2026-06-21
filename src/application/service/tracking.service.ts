@@ -17,6 +17,7 @@ import {
 import { TrackingMapper } from '@application/mapper/tracking.mapper';
 import { REPOSITORY_CONSTANTS } from '@domain/interface/constant';
 import { PushEventsService } from './push-event.service';
+import { AchievementService } from './achievement.service';
 
 @Injectable()
 export class TrackingService implements ITrackingService {
@@ -32,6 +33,7 @@ export class TrackingService implements ITrackingService {
     @Inject(REPOSITORY_CONSTANTS.RECIPE_REPOSITORY)
     private readonly recipeRepository: IRecipeRepository,
     private readonly pushService: PushEventsService,
+    private readonly achievementService: AchievementService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -93,6 +95,7 @@ export class TrackingService implements ITrackingService {
     const tracking = TrackingMapper.toEntity(createDto, user, recipe || null, scaledNutrition);
     const created = await this.trackingRepository.create(tracking);
     await this.invalidateStatisticsCache();
+    await this.achievementService.onTrackingCreated(userId);
     return created;
   }
 
