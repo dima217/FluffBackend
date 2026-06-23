@@ -66,15 +66,6 @@ export class PushEventsService implements IPushEventsService {
     await this.sendToUserIds(users.map((u) => u[0].id), title, body, data ?? {});
   }
 
-  async notifyTracking(userId: number): Promise<void> {
-    await this.safe(async () => {
-      const { title, body } = PushNotificationContent.trackingReminderImmediate();
-      await this.sendToUserIds([userId], title, body, {
-        type: PushNotificationType.TRACKING_REMINDER,
-      });
-    });
-  }
-
   async notifySupportTicketReply(
     userId: number,
     ticketId: number,

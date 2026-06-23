@@ -37,11 +37,6 @@ export const PushNotificationContent = {
     body: `You still need around ${caloriesLeft} kcal today. Add one more meal to stay on track.`,
   }),
 
-  trackingReminderImmediate: () => ({
-    title: 'Not enough calories today',
-    body: 'At this rate, you yourself will become like my stem. Have another meal!',
-  }),
-
   supportTicketReply: (subject: string, messagePreview: string) => ({
     title: 'Ответ от поддержки',
     body: messagePreview
