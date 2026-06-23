@@ -37,7 +37,9 @@ import { MediaService } from '@application/service/media.service';
 import { AchievementService } from '@application/service/achievement.service';
 import type { AppConfig } from '@config';
 import { RecipeRating } from '@domain/entities/recipe.rating.entity';
+import type { IProfileRepository } from '@domain/interface/profile.repository';
 import type { IRecipeRatingRepository } from '@domain/interface/rating.repository';
+import { excludeCheatMealRecipeIds } from '@application/utils/cheat-meal.util';
 
 @Injectable()
 export class RecipeService implements IRecipeService {
@@ -56,6 +58,8 @@ export class RecipeService implements IRecipeService {
     private readonly favoriteRepository: IFavoriteRepository,
     @Inject(REPOSITORY_CONSTANTS.RATING_REPOSITORY)
     private readonly ratingRepository: IRecipeRatingRepository,
+    @Inject(REPOSITORY_CONSTANTS.PROFILE_REPOSITORY)
+    private readonly profileRepository: IProfileRepository,
     private readonly mediaService: MediaService,
     private readonly configService: ConfigService<AppConfig>,
     private readonly achievementService: AchievementService,
@@ -491,8 +495,31 @@ export class RecipeService implements IRecipeService {
       useOr,
     );
 
-    this.logger.log(`Found ${recipes.length} recipes matching search criteria`);
-    return recipes;
+    const filteredRecipes = await this.excludeUserCheatMealRecipes(recipes, userId);
+
+    this.logger.log(`Found ${filteredRecipes.length} recipes matching search criteria`);
+    return filteredRecipes;
+  }
+
+  private async excludeUserCheatMealRecipes(
+    recipes: Recipe[],
+    userId?: number | null,
+  ): Promise<Recipe[]> {
+    if (!userId || recipes.length === 0) {
+      return recipes;
+    }
+
+    try {
+      const profile = await this.profileRepository.findByUserId(userId);
+      return excludeCheatMealRecipeIds(
+        recipes,
+        profile.cheatMeal ?? [],
+        profile.cheatMealDay,
+        profile.periodOfDays,
+      );
+    } catch {
+      return recipes;
+    }
   }
 
   async update(id: number, userId: number | null, updateDto: UpdateRecipeDto): Promise<Recipe> {
