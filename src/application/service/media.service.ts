@@ -18,7 +18,7 @@ export class MediaService implements IMediaService {
 
   constructor(private readonly configService: ConfigService<AppConfig>) {
     const appConfig = this.configService.get<AppConfig>('app', { infer: true });
-    this.baseUrl = appConfig?.media?.baseUrl ?? 'http://localhost:3001';
+    this.baseUrl = appConfig?.media?.baseUrl ?? 'http://media-service-5ZXP.railway.internal';
 
     this.httpClient = axios.create({
       baseURL: this.baseUrl,
